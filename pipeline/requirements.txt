@@ -1,0 +1,21 @@
+# Fáze 2b: SDK pro volání LLM při extrakci Claim (pipeline/claims.py).
+anthropic>=0.40
+
+# Fáze 3: lokální bi-encoder retrieval (pipeline/retrieval.py) a
+# cross-encoder NLI (pipeline/nli.py). `torch` je záměrně bez CUDA pinu —
+# pip si na cílovém stroji vybere odpovídající build sám.
+sentence-transformers>=3.0
+transformers>=4.40
+torch>=2.0
+
+# Fáze 7: forced alignment nad reálným zvukem videoarchivu PSP
+# (pipeline/psp/audio_align.py). `imageio-ffmpeg` je přenosný ffmpeg binární
+# soubor — žádná systémová instalace není potřeba.
+torchaudio>=2.1
+imageio-ffmpeg>=0.5
+
+# Instalace: python -m venv .venv && pip install -r pipeline/requirements.txt
+# `pipeline/claims.py` navíc vyžaduje proměnnou prostředí ANTHROPIC_API_KEY.
+# `pipeline/nli.py`/`pipeline/retrieval.py`/`pipeline/psp/audio_align.py`
+# při prvním spuštění stáhnou modely z Hugging Face Hubu (řádově stovky MB
+# až ~1,2 GB) a uloží je do lokální cache (~/.cache/huggingface).

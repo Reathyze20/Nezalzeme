@@ -1,0 +1,1038 @@
+[
+  {
+    "caseId": "gold-001",
+    "category": "CONTRADICTION_TIME",
+    "message": {
+      "messageId": "gold-001-m",
+      "speaker": "Petr Voráček",
+      "party": "ODU",
+      "role": "ministr financí",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Vážené kolegyně, vážení kolegové, garantuji, že tato vláda po celé volební období nezvýší sazbu daně z příjmu fyzických osob ani o desetinu procenta."
+    },
+    "candidate": {
+      "type": "CONTRADICTION_TIME",
+      "severity": "HIGH",
+      "shortBadgeLabel": "Rozpor se slibem o dani z příjmu",
+      "explanation": "Příslib nezvyšování sazby je v rozporu s dřívějším vyjádřením o možném zvýšení.",
+      "confidenceScore": 0.9,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Zvážíme navýšení sazby daně z příjmu fyzických osob o dva procentní body, pokud to schodek rozpočtu vyžádá.",
+        "pastDate": "2025-11-04",
+        "pastContext": "Rozprava k daňovému balíčku, 6. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/006schuz/s006021.htm"
+      },
+      "start": 34,
+      "end": 124,
+      "targetSnippet": "garantuji, že tato vláda po celé volební období nezvýší sazbu daně z příjmu fyzických osob"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Zkoumáno, zda výrok nebyl podmíněný jinou hospodářskou situací; oba výroky padly ve stejném rozpočtovém rámci bez uvedené podmínky.",
+      "defensesConsidered": [
+        "Mezi výroky se nezměnil makroekonomický výhled.",
+        "Nejde o citaci jiné osoby.",
+        "Výrok není ironický ani rétorický."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.9
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "CONTRADICTION_TIME",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-002",
+    "category": "CONTRADICTION_TIME",
+    "message": {
+      "messageId": "gold-002-m",
+      "speaker": "Karel Šimon",
+      "party": "HNU",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Od začátku jsem říkal, že o důchodovém věku 65 let se bavit nebudeme, a to platí i dnes."
+    },
+    "candidate": {
+      "type": "CONTRADICTION_TIME",
+      "severity": "HIGH",
+      "shortBadgeLabel": "Rozpor v postoji k důchodovému věku",
+      "explanation": "Odmítnutí diskuse o hranici 65 let je v rozporu s dřívější podporou jejího zavedení.",
+      "confidenceScore": 0.91,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Zvýšení hranice odchodu do důchodu na 65 let je jediná zodpovědná cesta, jak systém udržet dlouhodobě vyrovnaný.",
+        "pastDate": "2025-09-12",
+        "pastContext": "Rozprava k důchodové reformě, 2. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/002schuz/s002014.htm"
+      },
+      "start": 26,
+      "end": 68,
+      "targetSnippet": "o důchodovém věku 65 let se bavit nebudeme"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Zkoumáno, zda se nezměnily demografické projekce použité ve výpočtu; podklady ministerstva práce zůstaly beze změny.",
+      "defensesConsidered": [
+        "Stejná demografická prognóza jako u dřívějšího výroku.",
+        "Řečník mluví o vlastním postoji, ne o cizím návrhu.",
+        "Nejde o procedurální poznámku."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.91
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "CONTRADICTION_TIME",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-003",
+    "category": "CONTRADICTION_TIME",
+    "message": {
+      "messageId": "gold-003-m",
+      "speaker": "Petr Voráček",
+      "party": "ODU",
+      "role": "ministr financí",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Trvám na tom, že zastropování cen energií musí zůstat v plné výši i po letošní zimě."
+    },
+    "candidate": {
+      "type": "CONTRADICTION_TIME",
+      "severity": "HIGH",
+      "shortBadgeLabel": "Rozpor v postoji k zastropování cen energií",
+      "explanation": "Trvání na plném zastropování je v rozporu s dřívějším vyjádřením o jeho postupném uvolnění.",
+      "confidenceScore": 0.86,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Jakmile klesnou velkoobchodní ceny plynu pod historický průměr, zastropování postupně uvolníme.",
+        "pastDate": "2025-06-02",
+        "pastContext": "Rozprava k energetickému balíčku, 88. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/088schuz/s088019.htm"
+      },
+      "start": 17,
+      "end": 83,
+      "targetSnippet": "zastropování cen energií musí zůstat v plné výši i po letošní zimě"
+    },
+    "adversarialVerdict": {
+      "passed": false,
+      "defenseEvaluated": "Obhajoba obstála: velkoobchodní ceny mezitím klesly pod referenční hranici uvedenou v původním výroku, tedy přesně pod podmínku, kterou řečník sám stanovil pro uvolnění stropu.",
+      "defensesConsidered": [
+        "Cena na burze klesla pod uvedený historický průměr.",
+        "Řečník sám podmínku uvolnění formuloval dopředu.",
+        "Jde o stejný nástroj (strop cen), ne o jiné opatření."
+      ],
+      "downgradeTo": "VALUE_SHIFT",
+      "dismiss": false,
+      "confidenceScore": 0.83
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "VALUE_SHIFT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-004",
+    "category": "CONTRADICTION_TIME",
+    "message": {
+      "messageId": "gold-004-m",
+      "speaker": "Karel Šimon",
+      "party": "HNU",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Pokud si dobře vzpomínám, podobný návrh jsme před časem také zvažovali, i když podmínky byly jiné."
+    },
+    "candidate": {
+      "type": "CONTRADICTION_TIME",
+      "severity": "LOW",
+      "shortBadgeLabel": "Slabý signál bez jasné shody",
+      "explanation": "Náznak podobnosti s dřívějším návrhem bez konkrétního doložitelného protikladu.",
+      "confidenceScore": 0.58,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Zmínka o dřívější úvaze bez konkrétního data a bez citovatelného vyjádření.",
+        "pastDate": "2025-01-20",
+        "pastContext": "Neurčený zdroj",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/001schuz/s001008.htm"
+      },
+      "start": 26,
+      "end": 70,
+      "targetSnippet": "podobný návrh jsme před časem také zvažovali"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "below_threshold",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-005",
+    "category": "CONTRADICTION_TIME",
+    "message": {
+      "messageId": "gold-005-m",
+      "speaker": "Petr Voráček",
+      "party": "ODU",
+      "role": "ministr financí",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Odmítám škrty ve valorizaci důchodů, tak jak jsem to řekl už loni na jaře."
+    },
+    "candidate": {
+      "type": "CONTRADICTION_TIME",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Možný rozpor ve valorizaci důchodů",
+      "explanation": "Odmítnutí škrtů ve valorizaci může být v rozporu s dřívějším voláním po zpomalení jejího tempa.",
+      "confidenceScore": 0.75,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Valorizační mechanismus je potřeba dočasně zpomalit, dokud se nesrovná schodek běžného rozpočtu.",
+        "pastDate": "2025-04-18",
+        "pastContext": "Rozprava k důchodové valorizaci, 3. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/003schuz/s003027.htm"
+      },
+      "start": 0,
+      "end": 35,
+      "targetSnippet": "Odmítám škrty ve valorizaci důchodů"
+    },
+    "adversarialVerdict": {
+      "passed": false,
+      "defenseEvaluated": "Obhajoba obstála a rozpor neobstál: dřívější výrok mluvil o dočasném zpomalení tempa valorizace, nikoli o škrtech v její výši — jde o odlišná opatření.",
+      "defensesConsidered": [
+        "Dřívější výrok se týkal tempa růstu, ne výše dávky.",
+        "Nejde o stejný legislativní nástroj.",
+        "Řečník nikdy nemluvil o snížení nominální částky."
+      ],
+      "downgradeTo": null,
+      "dismiss": true,
+      "confidenceScore": 0.4
+    },
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "dismissed_by_adversarial_check",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-006",
+    "category": "CONTRADICTION_TIME",
+    "message": {
+      "messageId": "gold-006-m",
+      "speaker": "Petr Voráček",
+      "party": "ODU",
+      "role": "ministr financí",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Prosím pana předsedajícího, aby mi udělil slovo mimo pořadí, protože musím za chvíli na jednání vlády."
+    },
+    "candidate": {
+      "type": "CONTRADICTION_TIME",
+      "severity": "LOW",
+      "shortBadgeLabel": "Procedurální žádost",
+      "explanation": "Jde o procedurální žádost o pořadí v rozpravě, nikoli o věcné tvrzení.",
+      "confidenceScore": 0.88,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "PROCEDURAL",
+      "proof": {
+        "pastQuote": "Procedurální žádosti se mezi sebou nesrovnávají.",
+        "pastDate": "2026-03-10",
+        "pastContext": "Řízení schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/010schuz/s010003.htm"
+      },
+      "start": 0,
+      "end": 59,
+      "targetSnippet": "Prosím pana předsedajícího, aby mi udělil slovo mimo pořadí"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "procedural_excluded",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-007",
+    "category": "VOTE_MISMATCH",
+    "message": {
+      "messageId": "gold-007-m",
+      "speaker": "Hana Dvořáková",
+      "party": "SDL",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Nikdy bychom nepřipustili zpoplatnění akutní péče pro seniory, to je pro nás naprosto nepřijatelné."
+    },
+    "candidate": {
+      "type": "VOTE_MISMATCH",
+      "severity": "CRITICAL",
+      "shortBadgeLabel": "Rozpor s hlasováním o poplatku za urgentní příjem",
+      "explanation": "Řečnice hlasovala pro zavedení regulačního poplatku, který nyní slovně odmítá.",
+      "confidenceScore": 0.95,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Hlasování č. 118 k tisku 512, 9. schůze: Dvořáková H. — PRO. Tisk zavádí regulační poplatek 90 Kč za urgentní příjem u pacientů nad 65 let.",
+        "pastDate": "2026-02-11",
+        "pastContext": "Hlasování o tisku 512, 9. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/009schuz/hl118.htm",
+        "voteRecorded": "PRO",
+        "votingBallotId": "Hlasování č. 118, 9. schůze (11. 2. 2026)"
+      },
+      "start": 13,
+      "end": 61,
+      "targetSnippet": "nepřipustili zpoplatnění akutní péče pro seniory"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Zkoumáno, zda se mezi hlasováním a výrokem nezměnilo znění tisku; schválené znění poplatek zachovalo beze změny.",
+      "defensesConsidered": [
+        "Hlasovalo se o stejném znění tisku jako to, které je citováno.",
+        "Poplatek nebyl v mezidobí zrušen ani snížen.",
+        "Výrok padl ve vlastní rozpravě, nejde o citaci jiného poslance."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.95
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "VOTE_MISMATCH",
+    "expectedTier": "PUBLISHED"
+  },
+  {
+    "caseId": "gold-008",
+    "category": "VOTE_MISMATCH",
+    "message": {
+      "messageId": "gold-008-m",
+      "speaker": "Jana Malá",
+      "party": "DIG",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Zdravotnictví musí zůstat plně hrazené ze zdravotního pojištění bez jakékoliv spoluúčasti pacienta."
+    },
+    "candidate": {
+      "type": "VOTE_MISMATCH",
+      "severity": "HIGH",
+      "shortBadgeLabel": "Rozpor s hlasováním o spoluúčasti",
+      "explanation": "Řečnice hlasovala pro zavedení spoluúčasti u vybraných výkonů.",
+      "confidenceScore": 0.92,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Hlasování č. 74 k tisku 480, 7. schůze: Malá J. — PRO. Tisk zavádí spoluúčast 200 Kč u vybraných nadstandardních výkonů.",
+        "pastDate": "2026-01-22",
+        "pastContext": "Hlasování o tisku 480, 7. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/007schuz/hl074.htm",
+        "voteRecorded": "PRO",
+        "votingBallotId": "Hlasování č. 74, 7. schůze (22. 1. 2026)"
+      },
+      "start": 64,
+      "end": 98,
+      "targetSnippet": "bez jakékoliv spoluúčasti pacienta"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Zkoumáno, zda spoluúčast necílila jen na nadstandard mimo základní péči; tisk se týkal i části standardně hrazených výkonů.",
+      "defensesConsidered": [
+        "Spoluúčast se týkala i standardně hrazené péče.",
+        "Nejde o jinou verzi tisku.",
+        "Výrok je vlastním postojem, ne citací."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.92
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "VOTE_MISMATCH",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-009",
+    "category": "VOTE_MISMATCH",
+    "message": {
+      "messageId": "gold-009-m",
+      "speaker": "Hana Dvořáková",
+      "party": "SDL",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Trváme na tom, že navýšení preskripčních limitů pro praktické lékaře je nezbytné hned od příštího čtvrtletí."
+    },
+    "candidate": {
+      "type": "VOTE_MISMATCH",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Rozpor s dřívějším hlasováním o limitech",
+      "explanation": "Řečnice dříve hlasovala proti návrhu na navýšení limitů v širší podobě.",
+      "confidenceScore": 0.87,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Hlasování č. 55 k tisku 441, 5. schůze: Dvořáková H. — PROTI. Tisk navyšoval preskripční limity plošně u všech odborností bez rozpočtového krytí.",
+        "pastDate": "2025-12-03",
+        "pastContext": "Hlasování o tisku 441, 5. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/005schuz/hl055.htm",
+        "voteRecorded": "PROTI",
+        "votingBallotId": "Hlasování č. 55, 5. schůze (3. 12. 2025)"
+      },
+      "start": 18,
+      "end": 107,
+      "targetSnippet": "navýšení preskripčních limitů pro praktické lékaře je nezbytné hned od příštího čtvrtletí"
+    },
+    "adversarialVerdict": {
+      "passed": false,
+      "defenseEvaluated": "Obhajoba obstála: zamítnutý tisk navyšoval limity plošně u všech odborností bez rozpočtového krytí, zatímco nynější výrok cílí úžeji jen na praktické lékaře.",
+      "defensesConsidered": [
+        "Dřívější tisk byl plošný a nekrytý, nynější požadavek je užší.",
+        "Mezi hlasováním a výrokem se objevilo rozpočtové krytí návrhu.",
+        "Jde o stejný nástroj (limity), ale jiný rozsah."
+      ],
+      "downgradeTo": "VALUE_SHIFT",
+      "dismiss": false,
+      "confidenceScore": 0.81
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "VALUE_SHIFT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-010",
+    "category": "VOTE_MISMATCH",
+    "message": {
+      "messageId": "gold-010-m",
+      "speaker": "Jana Malá",
+      "party": "DIG",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "K tomu hlasování si nejsem jistá, jestli jsme se vyjadřovali úplně stejně, ale nejspíš ano."
+    },
+    "candidate": {
+      "type": "VOTE_MISMATCH",
+      "severity": "LOW",
+      "shortBadgeLabel": "Slabý signál bez určeného hlasování",
+      "explanation": "Vágní zmínka bez konkrétního odkazu na hlasování nebo tisk.",
+      "confidenceScore": 0.5,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Bez konkrétního odkazu na číslo hlasování.",
+        "pastDate": "2026-01-05",
+        "pastContext": "Neurčeno",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/006schuz/s006002.htm"
+      },
+      "start": 20,
+      "end": 73,
+      "targetSnippet": "nejsem jistá, jestli jsme se vyjadřovali úplně stejně"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "below_threshold",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-011",
+    "category": "VOTE_MISMATCH",
+    "message": {
+      "messageId": "gold-011-m",
+      "speaker": "Hana Dvořáková",
+      "party": "SDL",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Odmítáme jakékoliv omezení nároku na lázeňskou péči."
+    },
+    "candidate": {
+      "type": "VOTE_MISMATCH",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Možný rozpor u lázeňské péče",
+      "explanation": "Řečnice dříve hlasovala pro úpravu podmínek přiznávání lázeňské péče.",
+      "confidenceScore": 0.72,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Hlasování č. 30 k tisku 402, 4. schůze: Dvořáková H. — PRO. Tisk zpřesňuje administrativní postup posuzování žádostí o lázeňskou péči.",
+        "pastDate": "2025-10-14",
+        "pastContext": "Hlasování o tisku 402, 4. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/004schuz/hl030.htm",
+        "voteRecorded": "PRO",
+        "votingBallotId": "Hlasování č. 30, 4. schůze (14. 10. 2025)"
+      },
+      "start": 0,
+      "end": 51,
+      "targetSnippet": "Odmítáme jakékoliv omezení nároku na lázeňskou péči"
+    },
+    "adversarialVerdict": {
+      "passed": false,
+      "defenseEvaluated": "Obhajoba obstála a rozpor neobstál: schválený tisk upravoval jen administrativní postup posuzování žádostí, nikoliv samotný nárok na lázeňskou péči.",
+      "defensesConsidered": [
+        "Tisk se týkal procedury posuzování, ne výše ani rozsahu nároku.",
+        "Nárok na péči zůstal beze změny.",
+        "Nejde o stejný předmět úpravy jako ve výroku."
+      ],
+      "downgradeTo": null,
+      "dismiss": true,
+      "confidenceScore": 0.35
+    },
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "dismissed_by_adversarial_check",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-012",
+    "category": "VOTE_MISMATCH",
+    "message": {
+      "messageId": "gold-012-m",
+      "speaker": "Hana Dvořáková",
+      "party": "SDL",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Děkuji za slovo, budu telegraficky, protože čas na rozpravu už je stejně vyčerpaný."
+    },
+    "candidate": {
+      "type": "VOTE_MISMATCH",
+      "severity": "LOW",
+      "shortBadgeLabel": "Procedurální poznámka",
+      "explanation": "Jde o procedurální poznámku k času rozpravy, nikoli o věcné tvrzení.",
+      "confidenceScore": 0.8,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "PROCEDURAL",
+      "proof": {
+        "pastQuote": "Procedurální poznámky se nesrovnávají s hlasováním.",
+        "pastDate": "2026-03-10",
+        "pastContext": "Řízení schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/010schuz/s010005.htm"
+      },
+      "start": 17,
+      "end": 82,
+      "targetSnippet": "budu telegraficky, protože čas na rozpravu už je stejně vyčerpaný"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "procedural_excluded",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-013",
+    "category": "FACTUAL_MISSTATEMENT",
+    "message": {
+      "messageId": "gold-013-m",
+      "speaker": "Tomáš Beneš",
+      "party": "SPOJ",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Podle dostupných dat klesla loni nezaměstnanost pod jedno procento, což je historické minimum."
+    },
+    "candidate": {
+      "type": "FACTUAL_MISSTATEMENT",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Nepřesný údaj o nezaměstnanosti",
+      "explanation": "Citovaná míra nezaměstnanosti neodpovídá zveřejněným čtvrtletním datům.",
+      "confidenceScore": 0.88,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "FACTUAL_CLAIM",
+      "proof": {
+        "pastQuote": "Obecná míra nezaměstnanosti dosáhla ve čtvrtém čtvrtletí loňského roku 2,6 %, podle podkladů citovaných ve stejné rozpravě.",
+        "pastDate": "2026-02-02",
+        "pastContext": "Rozprava k situaci na trhu práce, 8. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/008schuz/s008011.htm"
+      },
+      "start": 21,
+      "end": 66,
+      "targetSnippet": "klesla loni nezaměstnanost pod jedno procento"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Zkoumáno, zda řečník necitoval jinou metodiku (např. podíl nezaměstnaných osob); podklady v rozpravě používaly stejnou definici jako citovaný zdroj.",
+      "defensesConsidered": [
+        "Použita stejná metodika jako u citovaného čísla.",
+        "Nejde o citaci jiné osoby.",
+        "Rozdíl mezi tvrzením a podkladem je řádový, ne zaokrouhlovací."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.88
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "FACTUAL_MISSTATEMENT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-014",
+    "category": "FACTUAL_MISSTATEMENT",
+    "message": {
+      "messageId": "gold-014-m",
+      "speaker": "Karel Šimon",
+      "party": "HNU",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Výdaje na zdravotnictví jako podíl HDP jsou u nás nejnižší v celé Evropské unii."
+    },
+    "candidate": {
+      "type": "FACTUAL_MISSTATEMENT",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Nepřesné srovnání výdajů na zdravotnictví",
+      "explanation": "Podíl výdajů na zdravotnictví na HDP řadí ČR do středu žebříčku zemí EU, ne na poslední místo.",
+      "confidenceScore": 0.86,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "FACTUAL_CLAIM",
+      "proof": {
+        "pastQuote": "Srovnávací přehled citovaný ve stejné rozpravě řadí ČR do středu žebříčku zemí EU podle podílu výdajů na zdravotnictví na HDP.",
+        "pastDate": "2026-02-02",
+        "pastContext": "Rozprava k situaci na trhu práce, 8. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/008schuz/s008014.htm"
+      },
+      "start": 39,
+      "end": 79,
+      "targetSnippet": "jsou u nás nejnižší v celé Evropské unii"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Zkoumáno, zda řečník nemluvil o výdajích na hlavu, ne o podílu na HDP; z kontextu rozpravy jasně vyplývá podíl na HDP.",
+      "defensesConsidered": [
+        "Z kontextu jde jednoznačně o podíl na HDP.",
+        "Použit stejný rok srovnání jako citovaný zdroj.",
+        "Nejde o rétorickou nadsázku, výrok je podán jako fakt."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.86
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "FACTUAL_MISSTATEMENT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-015",
+    "category": "FACTUAL_MISSTATEMENT",
+    "message": {
+      "messageId": "gold-015-m",
+      "speaker": "Tomáš Beneš",
+      "party": "SPOJ",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Vláda letos navýšila výdaje na obranu o celých deset procent oproti loňskému roku."
+    },
+    "candidate": {
+      "type": "FACTUAL_MISSTATEMENT",
+      "severity": "HIGH",
+      "shortBadgeLabel": "Nepřesný údaj o navýšení výdajů na obranu",
+      "explanation": "Schválený rozpočet navyšuje výdaje na obranu o tři procenta, ne o deset.",
+      "confidenceScore": 0.9,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "FACTUAL_CLAIM",
+      "proof": {
+        "pastQuote": "Schválený rozpočet kapitoly obrany na letošní rok navyšuje výdaje o tři procenta oproti loňskému roku.",
+        "pastDate": "2026-01-15",
+        "pastContext": "Rozprava ke státnímu rozpočtu, 6. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/006schuz/s006033.htm"
+      },
+      "start": 12,
+      "end": 60,
+      "targetSnippet": "navýšila výdaje na obranu o celých deset procent"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Zkoumáno, zda řečník nepočítal i mimořádné položky mimo kapitolu obrany; schválený rozpočet žádné takové položky nepřidává.",
+      "defensesConsidered": [
+        "Schválený rozpočet nemá mimořádnou kapitolu navíc.",
+        "Číslo je porovnatelné rok na rok, ne kumulativně.",
+        "Výrok je podán jako fakt, ne jako odhad."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.9
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "FACTUAL_MISSTATEMENT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-016",
+    "category": "FACTUAL_MISSTATEMENT",
+    "message": {
+      "messageId": "gold-016-m",
+      "speaker": "Karel Šimon",
+      "party": "HNU",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Tuším, že podobné číslo jsme už někde slyšeli, ale nejsem si stoprocentně jistý zdrojem."
+    },
+    "candidate": {
+      "type": "FACTUAL_MISSTATEMENT",
+      "severity": "LOW",
+      "shortBadgeLabel": "Slabý signál bez určeného zdroje",
+      "explanation": "Vágní odkaz na neurčené číslo bez ověřitelného zdroje.",
+      "confidenceScore": 0.52,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "FACTUAL_CLAIM",
+      "proof": {
+        "pastQuote": "Bez konkrétního čísla ani zdroje k ověření.",
+        "pastDate": "2026-02-02",
+        "pastContext": "Neurčeno",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/008schuz/s008016.htm"
+      },
+      "start": 10,
+      "end": 45,
+      "targetSnippet": "podobné číslo jsme už někde slyšeli"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "below_threshold",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-017",
+    "category": "FACTUAL_MISSTATEMENT",
+    "message": {
+      "messageId": "gold-017-m",
+      "speaker": "Tomáš Beneš",
+      "party": "SPOJ",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Inflace se za poslední rok prakticky zastavila."
+    },
+    "candidate": {
+      "type": "FACTUAL_MISSTATEMENT",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Možný nepřesný údaj o inflaci",
+      "explanation": "Meziroční inflace v citovaném období nebyla nulová.",
+      "confidenceScore": 0.7,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "FACTUAL_CLAIM",
+      "proof": {
+        "pastQuote": "Meziroční inflace dosáhla v citovaném měsíci 2,1 %; teprve meziměsíční hodnota byla blízko nule.",
+        "pastDate": "2026-02-02",
+        "pastContext": "Rozprava k situaci na trhu práce, 8. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/008schuz/s008019.htm"
+      },
+      "start": 0,
+      "end": 46,
+      "targetSnippet": "Inflace se za poslední rok prakticky zastavila"
+    },
+    "adversarialVerdict": {
+      "passed": false,
+      "defenseEvaluated": "Obhajoba obstála a rozpor neobstál: řečník z kontextu zjevně mluvil o meziměsíčním, nikoli meziročním nárůstu cen, a ten skutečně byl blízko nule.",
+      "defensesConsidered": [
+        "Z kontextu jde o meziměsíční srovnání.",
+        "Meziměsíční hodnota byla skutečně blízko nule.",
+        "Nejde o stejnou metriku jako u meziroční inflace."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.45
+    },
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "dismissed_by_adversarial_check",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-018",
+    "category": "FACTUAL_MISSTATEMENT",
+    "message": {
+      "messageId": "gold-018-m",
+      "speaker": "Tomáš Beneš",
+      "party": "SPOJ",
+      "role": "poslanec",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Než budeme pokračovat, chci ocenit legislativní odbor za rychlé zpracování pozměňovacích návrhů."
+    },
+    "candidate": {
+      "type": "FACTUAL_MISSTATEMENT",
+      "severity": "LOW",
+      "shortBadgeLabel": "Procedurální poděkování",
+      "explanation": "Jde o procedurální poděkování, nikoli o ověřitelné tvrzení.",
+      "confidenceScore": 0.83,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "PROCEDURAL",
+      "proof": {
+        "pastQuote": "Procedurální poděkování se nesrovnává s daty.",
+        "pastDate": "2026-03-10",
+        "pastContext": "Řízení schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/010schuz/s010007.htm"
+      },
+      "start": 23,
+      "end": 74,
+      "targetSnippet": "chci ocenit legislativní odbor za rychlé zpracování"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "procedural_excluded",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-019",
+    "category": "VALUE_SHIFT",
+    "message": {
+      "messageId": "gold-019-m",
+      "speaker": "Lucie Krejčová",
+      "party": "OBN",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Dnes už zastávám názor, že jaderná energetika by měla tvořit páteř našeho energetického mixu."
+    },
+    "candidate": {
+      "type": "VALUE_SHIFT",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Posun postoje k jaderné energetice",
+      "explanation": "Podpora jaderné energetiky jako páteře mixu je posunem oproti dřívější zdrženlivosti.",
+      "confidenceScore": 0.86,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Nová jaderná bloky jsou drahá a pomalá odpověď na energetickou krizi.",
+        "pastDate": "2024-09-05",
+        "pastContext": "Rozprava k energetické koncepci, 40. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/040schuz/s040022.htm"
+      },
+      "start": 27,
+      "end": 92,
+      "targetSnippet": "jaderná energetika by měla tvořit páteř našeho energetického mixu"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Posun postoje potvrzen; energetická krize a zdražení dovozu plynu jsou doložitelný důvod ke změně, výrok je proto zveřejněn jako vývoj stanoviska, ne jako skrytý rozpor.",
+      "defensesConsidered": [
+        "Mezi výroky proběhla zdokumentovaná energetická krize.",
+        "Řečnice změnu sama pojmenovává slovem „dnes“.",
+        "Nejde o citaci jiné osoby ani o ironii."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.86
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "VALUE_SHIFT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-020",
+    "category": "VALUE_SHIFT",
+    "message": {
+      "messageId": "gold-020-m",
+      "speaker": "Jana Malá",
+      "party": "DIG",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "V otázce prodloužení životnosti uhelných elektráren jsem dnes mnohem otevřenější než dřív."
+    },
+    "candidate": {
+      "type": "VALUE_SHIFT",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Posun postoje k uhelným elektrárnám",
+      "explanation": "Otevřenost k prodloužení provozu uhelných bloků je posunem oproti dřívějšímu odmítání.",
+      "confidenceScore": 0.83,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Prodlužování provozu uhelných elektráren je krokem zpět a nepřipustíme ho.",
+        "pastDate": "2024-11-20",
+        "pastContext": "Rozprava k energetické bezpečnosti, 45. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/045schuz/s045009.htm"
+      },
+      "start": 52,
+      "end": 89,
+      "targetSnippet": "jsem dnes mnohem otevřenější než dřív"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Posun postoje potvrzen jako vývoj stanoviska; řečnice sama uvádí srovnání s dřívějším postojem.",
+      "defensesConsidered": [
+        "Řečnice sama pojmenovává změnu slovy „dnes“ a „dřív“.",
+        "Mezi výroky se zhoršila bilance energetické soustavy v zimě.",
+        "Nejde o citaci jiné osoby."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.83
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "VALUE_SHIFT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-021",
+    "category": "VALUE_SHIFT",
+    "message": {
+      "messageId": "gold-021-m",
+      "speaker": "Lucie Krejčová",
+      "party": "OBN",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Podporu obnovitelným zdrojům bych dnes nastavila výrazně opatrněji než na začátku volebního období."
+    },
+    "candidate": {
+      "type": "VALUE_SHIFT",
+      "severity": "LOW",
+      "shortBadgeLabel": "Posun postoje k podpoře obnovitelných zdrojů",
+      "explanation": "Opatrnější přístup k podpoře OZE je posunem oproti dřívějšímu důrazu na jejich rychlý rozvoj.",
+      "confidenceScore": 0.81,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Podporu obnovitelných zdrojů musíme razantně zrychlit, jinak nesplníme závazky.",
+        "pastDate": "2024-03-14",
+        "pastContext": "Rozprava k energetické koncepci, 30. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/030schuz/s030018.htm"
+      },
+      "start": 39,
+      "end": 98,
+      "targetSnippet": "nastavila výrazně opatrněji než na začátku volebního období"
+    },
+    "adversarialVerdict": {
+      "passed": true,
+      "defenseEvaluated": "Posun postoje potvrzen; řečnice sama srovnává nynější a dřívější nastavení, jde o vývoj stanoviska, ne o skrytý rozpor.",
+      "defensesConsidered": [
+        "Řečnice sama uvádí srovnání s obdobím na začátku volebního období.",
+        "Nejde o citaci jiné osoby.",
+        "Výrok není rétorickou nadsázkou."
+      ],
+      "downgradeTo": null,
+      "dismiss": false,
+      "confidenceScore": 0.81
+    },
+    "expectedOutcome": "PUBLISHED",
+    "expectedType": "VALUE_SHIFT",
+    "expectedTier": "CONTEXT_DEVELOPMENT"
+  },
+  {
+    "caseId": "gold-022",
+    "category": "VALUE_SHIFT",
+    "message": {
+      "messageId": "gold-022-m",
+      "speaker": "Jana Malá",
+      "party": "DIG",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Můj pohled na energetiku se možná trochu proměnil, ale nedokážu to teď přesně formulovat."
+    },
+    "candidate": {
+      "type": "VALUE_SHIFT",
+      "severity": "LOW",
+      "shortBadgeLabel": "Slabý signál posunu postoje",
+      "explanation": "Vágní zmínka o možné proměně postoje bez konkrétního srovnání.",
+      "confidenceScore": 0.55,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Bez konkrétního dřívějšího výroku k porovnání.",
+        "pastDate": "2026-01-05",
+        "pastContext": "Neurčeno",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/006schuz/s006004.htm"
+      },
+      "start": 0,
+      "end": 49,
+      "targetSnippet": "Můj pohled na energetiku se možná trochu proměnil"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "below_threshold",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-023",
+    "category": "VALUE_SHIFT",
+    "message": {
+      "messageId": "gold-023-m",
+      "speaker": "Lucie Krejčová",
+      "party": "OBN",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "K uhlí se dnes stavím vstřícněji než v minulosti."
+    },
+    "candidate": {
+      "type": "VALUE_SHIFT",
+      "severity": "MEDIUM",
+      "shortBadgeLabel": "Možný posun postoje k uhlí",
+      "explanation": "Vstřícnost k uhlí může navazovat na dřívější odmítavé vyjádření ke konkrétnímu dolu.",
+      "confidenceScore": 0.68,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "STANCE_COMMITMENT",
+      "proof": {
+        "pastQuote": "Pokračování těžby v dole Emerán je nepřijatelné a musí skončit.",
+        "pastDate": "2023-05-11",
+        "pastContext": "Rozprava k těžebním limitům, 15. schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/015schuz/s015006.htm"
+      },
+      "start": 0,
+      "end": 48,
+      "targetSnippet": "K uhlí se dnes stavím vstřícněji než v minulosti"
+    },
+    "adversarialVerdict": {
+      "passed": false,
+      "defenseEvaluated": "Obhajoba obstála a rozpor neobstál: dřívější výrok se týkal konkrétního, mezitím uzavřeného dolu, nikoli uhelné výroby energie obecně.",
+      "defensesConsidered": [
+        "Dřívější výrok mířil na jeden konkrétní, dnes uzavřený důl.",
+        "Nejde o stejný předmět jako uhelné elektrárny obecně.",
+        "Mezi výroky uplynulo dost času na uzavření dolu."
+      ],
+      "downgradeTo": null,
+      "dismiss": true,
+      "confidenceScore": 0.38
+    },
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "dismissed_by_adversarial_check",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  },
+  {
+    "caseId": "gold-024",
+    "category": "VALUE_SHIFT",
+    "message": {
+      "messageId": "gold-024-m",
+      "speaker": "Lucie Krejčová",
+      "party": "OBN",
+      "role": "poslankyně",
+      "timestamp": "14:00",
+      "date": "2026-03-10",
+      "cleanText": "Dovolte mi krátkou technickou poznámku k pořadu jednání dnešní schůze."
+    },
+    "candidate": {
+      "type": "VALUE_SHIFT",
+      "severity": "LOW",
+      "shortBadgeLabel": "Procedurální poznámka",
+      "explanation": "Jde o procedurální poznámku k pořadu jednání, nikoli o postojové tvrzení.",
+      "confidenceScore": 0.79,
+      "nliRelation": "CONTRADICTION",
+      "claimCategory": "PROCEDURAL",
+      "proof": {
+        "pastQuote": "Procedurální poznámky se nesrovnávají s dřívějším postojem.",
+        "pastDate": "2026-03-10",
+        "pastContext": "Řízení schůze",
+        "sourceUrl": "https://www.psp.cz/eknih/2025ps/stenprot/010schuz/s010009.htm"
+      },
+      "start": 11,
+      "end": 55,
+      "targetSnippet": "krátkou technickou poznámku k pořadu jednání"
+    },
+    "adversarialVerdict": null,
+    "expectedOutcome": "REJECTED",
+    "rejectReason": "procedural_excluded",
+    "expectedType": null,
+    "expectedTier": "DROPPED"
+  }
+]

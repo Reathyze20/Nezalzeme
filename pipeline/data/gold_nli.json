@@ -1,0 +1,135 @@
+[
+  {
+    "pairId": "nli-c01",
+    "expectedRelation": "CONTRADICTION",
+    "speaker": "Petr Voráček",
+    "textA": "Garantuji, že tato vláda po celé volební období nezvýší sazbu daně z příjmu fyzických osob ani o desetinu procenta.",
+    "textB": "Zvážíme navýšení sazby daně z příjmu fyzických osob o dva procentní body, pokud to schodek rozpočtu vyžádá."
+  },
+  {
+    "pairId": "nli-c02",
+    "expectedRelation": "CONTRADICTION",
+    "speaker": "Karel Šimon",
+    "textA": "Od začátku jsem říkal, že o důchodovém věku 65 let se bavit nebudeme, a to platí i dnes.",
+    "textB": "Zvýšení hranice odchodu do důchodu na 65 let je jediná zodpovědná cesta, jak systém udržet dlouhodobě vyrovnaný."
+  },
+  {
+    "pairId": "nli-c03",
+    "expectedRelation": "CONTRADICTION",
+    "speaker": "Hana Dvořáková",
+    "textA": "Nikdy bychom nepřipustili zpoplatnění akutní péče pro seniory, to je pro nás naprosto nepřijatelné.",
+    "textB": "Hlasování č. 118 k tisku 512, 9. schůze: Dvořáková H. — PRO. Tisk zavádí regulační poplatek 90 Kč za urgentní příjem u pacientů nad 65 let."
+  },
+  {
+    "pairId": "nli-c04",
+    "expectedRelation": "CONTRADICTION",
+    "speaker": "Jana Malá",
+    "textA": "Zdravotnictví musí zůstat plně hrazené ze zdravotního pojištění bez jakékoliv spoluúčasti pacienta.",
+    "textB": "Hlasování č. 74 k tisku 480, 7. schůze: Malá J. — PRO. Tisk zavádí spoluúčast 200 Kč u vybraných nadstandardních výkonů."
+  },
+  {
+    "pairId": "nli-c05",
+    "expectedRelation": "CONTRADICTION",
+    "speaker": "Tomáš Beneš",
+    "textA": "Podle dostupných dat klesla loni nezaměstnanost pod jedno procento, což je historické minimum.",
+    "textB": "Obecná míra nezaměstnanosti dosáhla ve čtvrtém čtvrtletí loňského roku 2,6 %, podle podkladů citovaných ve stejné rozpravě."
+  },
+  {
+    "pairId": "nli-c06",
+    "expectedRelation": "CONTRADICTION",
+    "speaker": "Tomáš Beneš",
+    "textA": "Vláda letos navýšila výdaje na obranu o celých deset procent oproti loňskému roku.",
+    "textB": "Schválený rozpočet kapitoly obrany na letošní rok navyšuje výdaje o tři procenta oproti loňskému roku."
+  },
+  {
+    "pairId": "nli-n01",
+    "expectedRelation": "NEUTRAL",
+    "speaker": "Petr Voráček",
+    "note": "konjunktiv/podmínka: výjimka z původního výroku byla uvedená dopředu",
+    "textA": "Trvám na tom, že zastropování cen energií musí zůstat v plné výši i po letošní zimě.",
+    "textB": "Jakmile klesnou velkoobchodní ceny plynu pod historický průměr, zastropování postupně uvolníme."
+  },
+  {
+    "pairId": "nli-n02",
+    "expectedRelation": "NEUTRAL",
+    "speaker": "Hana Dvořáková",
+    "note": "užší rozsah požadavku, ne stejný předmět jako dřívější hlasování",
+    "textA": "Trváme na tom, že navýšení preskripčních limitů pro praktické lékaře je nezbytné hned od příštího čtvrtletí.",
+    "textB": "Hlasování č. 55 k tisku 441, 5. schůze: Dvořáková H. — PROTI. Tisk navyšoval preskripční limity plošně u všech odborností bez rozpočtového krytí."
+  },
+  {
+    "pairId": "nli-n03",
+    "expectedRelation": "NEUTRAL",
+    "speaker": "Tomáš Beneš",
+    "note": "jiná metrika (meziměsíční vs. meziroční), ne skutečný rozpor",
+    "textA": "Inflace se za poslední rok prakticky zastavila.",
+    "textB": "Meziroční inflace dosáhla v citovaném měsíci 2,1 %; teprve meziměsíční hodnota byla blízko nule."
+  },
+  {
+    "pairId": "nli-n04",
+    "expectedRelation": "NEUTRAL",
+    "speaker": "Lucie Krejčová",
+    "note": "legitimní posun postoje v čase (VALUE_SHIFT), ne rozpor za stejných podmínek",
+    "textA": "Dnes už zastávám názor, že jaderná energetika by měla tvořit páteř našeho energetického mixu.",
+    "textB": "Nová jaderná bloky jsou drahá a pomalá odpověď na energetickou krizi."
+  },
+  {
+    "pairId": "nli-n05",
+    "expectedRelation": "NEUTRAL",
+    "speaker": "Lucie Krejčová",
+    "note": "jiný konkrétní předmět (jeden uzavřený důl) než uhlí obecně",
+    "textA": "K uhlí se dnes stavím vstřícněji než v minulosti.",
+    "textB": "Pokračování těžby v dole Emerán je nepřijatelné a musí skončit."
+  },
+  {
+    "pairId": "nli-n06",
+    "expectedRelation": "NEUTRAL",
+    "speaker": "Karel Šimon",
+    "note": "dvě nesouvisející témata — model nesmí vynucovat rozpor jen z podobného rejstříku",
+    "textA": "Podporuji zrychlení výstavby jaderných bloků.",
+    "textB": "Prosazuji rozšíření sdílených úvazků ve státní správě."
+  },
+  {
+    "pairId": "nli-e01",
+    "expectedRelation": "ENTAILMENT",
+    "speaker": "Petr Voráček",
+    "textA": "Trváme na tom, že sazbu daně z příjmu fyzických osob nezvýšíme, ať se schodek vyvíjí jakkoliv.",
+    "textB": "Sazbu daně z příjmu fyzických osob nezvýšíme, to platilo od začátku a platí to i teď."
+  },
+  {
+    "pairId": "nli-e02",
+    "expectedRelation": "ENTAILMENT",
+    "speaker": "Karel Šimon",
+    "textA": "Podporuji zvýšení hranice odchodu do důchodu na 65 let, protože jinak systém nebude dlouhodobě udržitelný.",
+    "textB": "Jsem pro to, aby se hranice odchodu do důchodu zvýšila na 65 let kvůli udržitelnosti systému."
+  },
+  {
+    "pairId": "nli-e03",
+    "expectedRelation": "ENTAILMENT",
+    "speaker": "Hana Dvořáková",
+    "textA": "Hlasovali jsme pro zavedení poplatku za urgentní příjem, protože jinak systém urgentní péče kolabuje.",
+    "textB": "Hlasování č. 118: Dvořáková H. — PRO zavedení poplatku za urgentní příjem u pacientů nad 65 let."
+  },
+  {
+    "pairId": "nli-e04",
+    "expectedRelation": "ENTAILMENT",
+    "speaker": "Tomáš Beneš",
+    "textA": "Míra nezaměstnanosti se loni ve čtvrtém čtvrtletí pohybovala kolem 2,6 procenta.",
+    "textB": "Obecná míra nezaměstnanosti dosáhla ve čtvrtém čtvrtletí loňského roku 2,6 %."
+  },
+  {
+    "pairId": "nli-e05",
+    "expectedRelation": "ENTAILMENT",
+    "speaker": "Lucie Krejčová",
+    "textA": "Podporu obnovitelných zdrojů je třeba dál razantně zrychlovat, jinak nesplníme závazky.",
+    "textB": "Podporu obnovitelných zdrojů musíme razantně zrychlit, jinak nesplníme závazky."
+  },
+  {
+    "pairId": "nli-e06",
+    "expectedRelation": "ENTAILMENT",
+    "speaker": "Jana Malá",
+    "note": "procedurální formule — obsahově totéž, jen jinak zdvořilostně formulované",
+    "textA": "Děkuji za slovo, vyjádřím se stručně.",
+    "textB": "Děkuji, pane předsedající, budu telegraficky."
+  }
+]

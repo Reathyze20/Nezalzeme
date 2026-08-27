@@ -1,0 +1,133 @@
+[
+  {
+    "debateId": "psp-9-schuze-84-2024-rozpoctova-pravidla",
+    "title": "Návrh zákona o úpravě rozpočtových pravidel",
+    "topic": "Sněmovní tisk 488 · úprava pravidel hospodaření kapitol státního rozpočtu",
+    "chamber": "Poslanecká sněmovna Parlamentu ČR",
+    "term": "9. volební období",
+    "sessionNumber": 84,
+    "date": "2024-06-12",
+    "tiskNumber": "ST 488",
+    "status": "SCHVÁLENO",
+    "description": "Druhé čtení návrhu, který upravuje rozpočtová pravidla napříč kapitolami.",
+    "messages": [
+      {
+        "messageId": "roz-01",
+        "speaker": "Jiří Vrána",
+        "party": "SDL",
+        "role": "ministr financí",
+        "timestamp": "14:15",
+        "date": "2024-06-12",
+        "cleanText": "Předkládám návrh, který srovná rozpočtová pravidla napříč kapitolami. Nezvyšujeme celkovou daňovou zátěž, jen zpřesňujeme, kdo za co odpovídá.",
+        "speechAct": "OWN_STANCE",
+        "hasAnomalies": true,
+        "annotations": [
+          {
+            "id": "roz-01-a1",
+            "type": "VOTE_MISMATCH",
+            "severity": "CRITICAL",
+            "shortBadgeLabel": "Rozpor s hlasováním",
+            "explanation": "Řečník hlasoval pro tisk se zvýšením sazby DPPO ve stejný den, kdy pronesl tento výrok.",
+            "confidenceScore": 0.96,
+            "nliRelation": "CONTRADICTION",
+            "claimCategory": "STANCE_COMMITMENT",
+            "adversarialCheck": {
+              "passed": true,
+              "defenseEvaluated": "Zkoumáno, zda hlasoval o pozměněném znění bez daňové části; tisk 488 obsahoval zvýšení sazby i ve schváleném znění.",
+              "defensesConsidered": [
+                "Hlasovalo se o jiném znění tisku, než ke kterému se výrok vztahoval.",
+                "Zvýšení sazby DPPO nezvyšuje celkovou zátěž, protože jinde klesá.",
+                "Výrok mířil na domácnosti, nikoli na právnické osoby."
+              ]
+            },
+            "proof": {
+              "pastQuote": "Hlasování č. 204 k tisku 488, 12. 6. 2024: Vrána J. — PRO. Tisk zvyšuje sazbu daně z příjmu právnických osob z 19 % na 21 %.",
+              "pastDate": "2024-06-12",
+              "pastContext": "Hlasování Poslanecké sněmovny o tisku 488",
+              "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/084schuz/hl204.htm",
+              "voteRecorded": "PRO",
+              "votingBallotId": "Hlasování č. 204, 84. schůze (12. 6. 2024)"
+            },
+            "start": 70,
+            "end": 104,
+            "targetSnippet": "Nezvyšujeme celkovou daňovou zátěž"
+          }
+        ]
+      },
+      {
+        "messageId": "roz-06",
+        "speaker": "Alena Kovářová",
+        "party": "ODU",
+        "role": "místopředsedkyně vlády",
+        "timestamp": "14:47",
+        "date": "2024-06-12",
+        "cleanText": "Dnes jsem přesvědčená, že jednotná sazba DPH je pro rodiny výhodnější než dosavadní dvě sazby.",
+        "speechAct": "OWN_STANCE",
+        "hasAnomalies": true,
+        "annotations": [
+          {
+            "id": "roz-06-a1",
+            "type": "VALUE_SHIFT",
+            "severity": "LOW",
+            "shortBadgeLabel": "Změna postoje",
+            "explanation": "Oponentní přezkum uznal změnu výchozích podmínek, kategorie byla zmírněna z časového rozporu na názorový posun.",
+            "confidenceScore": 0.84,
+            "nliRelation": "NEUTRAL",
+            "claimCategory": "STANCE_COMMITMENT",
+            "adversarialCheck": {
+              "passed": false,
+              "downgradedFrom": "CONTRADICTION_TIME",
+              "defenseEvaluated": "Obhajoba obstála: mezi výroky vstoupila v účinnost novela sjednocující sníženou sazbu.",
+              "defensesConsidered": [
+                "Mezi výroky se změnila právní úprava sazeb DPH.",
+                "Řečnice změnu postoje výslovně uvádí slovem „dnes“.",
+                "Dřívější výrok se týkal jiného rozsahu zboží ve snížené sazbě."
+              ]
+            },
+            "proof": {
+              "pastQuote": "Dvě sazby DPH chrání základní potraviny. Sjednocení by dopadlo na ty nejchudší.",
+              "pastDate": "2022-03-09",
+              "pastContext": "Rozprava k novele zákona o DPH, 61. schůze",
+              "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/061schuz/s061077.htm"
+            },
+            "start": 26,
+            "end": 69,
+            "targetSnippet": "jednotná sazba DPH je pro rodiny výhodnější"
+          }
+        ]
+      },
+      {
+        "messageId": "roz-07",
+        "speaker": "Věra Nedvědová",
+        "party": "SDL",
+        "role": "předsedkyně rozpočtového výboru",
+        "timestamp": "14:51",
+        "date": "2024-06-12",
+        "cleanText": "Na dotaz kolegyně Marešové: podle propočtu výboru jde o 43 obcí, seznam je přílohou usnesení číslo 118. Rozešlu ho všem klubům do konce dnešního jednání.",
+        "speechAct": "OWN_STANCE",
+        "hasAnomalies": true,
+        "annotations": [
+          {
+            "id": "roz-07-a1",
+            "type": "FACTUAL_ERROR",
+            "severity": "LOW",
+            "shortBadgeLabel": "Neověřený počet obcí",
+            "explanation": "Usnesení č. 118 nebylo v době analýzy zveřejněno, číslo tedy nelze proti zdroji ověřit ani vyvrátit.",
+            "confidenceScore": 0.62,
+            "nliRelation": "NEUTRAL",
+            "claimCategory": "FACTUAL_CLAIM",
+            "proof": {
+              "pastQuote": "Usnesení rozpočtového výboru č. 118 nebylo k datu analýzy publikováno.",
+              "pastDate": "2024-06-12",
+              "pastContext": "Rejstřík usnesení rozpočtového výboru",
+              "sourceUrl": "https://www.psp.cz/eknih/2021ps/stenprot/084schuz/s084043.htm"
+            },
+            "start": 28,
+            "end": 63,
+            "targetSnippet": "podle propočtu výboru jde o 43 obcí"
+          }
+        ]
+      }
+    ]
+  }
+]

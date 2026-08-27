@@ -1,0 +1,39 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Env
+.env
+.env*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Pipeline raw/reproducible caches (fetched from PSP API, regeneratable)
+pipeline/data/psp_cache/
+pipeline/data/audio_cache/
+
+# gstack local tool logs (browse skill session state)
+.gstack/

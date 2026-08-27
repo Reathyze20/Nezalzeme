@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   NEZALŽEME — token systém
+   papír a inkoust, petrolej pro ověřené odkazy, rez jen pro rozpor.
+   Tmavý režim se přepíná třídou .dark na <html> (viz ThemeScript).
+   ============================================================ */
+
+@layer base {
+  :root {
+    --papir: 74 12% 91%;
+    --list: 80 14% 97%;
+    --list-2: 60 20% 99%;
+    --inkoust: 150 19% 12%;
+    --inkoust-2: 152 8% 36%;
+    --inkoust-3: 140 5% 55%;
+    --linka: 90 8% 82%;
+    --linka-2: 84 10% 87%;
+    --dilek: 84 8% 80%;
+
+    --overeno: 172 74% 21%;
+    --overeno-tl: 172 74% 21%;
+    --rozpor: 12 58% 38%;
+    --rozpor-tl: 12 58% 38%;
+
+    --background: var(--papir);
+    --foreground: var(--inkoust);
+    --border: var(--linka);
+    --radius: 3px;
+  }
+
+  .dark {
+    --papir: 140 12% 7%;
+    --list: 140 12% 10%;
+    --list-2: 140 12% 13%;
+    --inkoust: 90 15% 90%;
+    --inkoust-2: 130 8% 63%;
+    --inkoust-3: 140 6% 44%;
+    --linka: 150 15% 20%;
+    --linka-2: 150 14% 16%;
+    --dilek: 150 12% 24%;
+
+    --overeno: 168 40% 55%;
+    --overeno-tl: 168 40% 55%;
+    --rozpor: 16 65% 65%;
+    --rozpor-tl: 16 65% 65%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: hsl(var(--papir));
+    color: hsl(var(--inkoust));
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--overeno));
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Roboto Serif nese osu optické velikosti — ať se řez ladí podle stupně písma */
+.font-serif-text {
+  font-optical-sizing: auto;
+}
+
+/* Dvojité podtržení jako korektorská značka nad zvýrazněným úryvkem výroku */
+.sporne {
+  text-decoration-line: underline;
+  text-decoration-style: double;
+  text-decoration-color: hsl(var(--rozpor));
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.sporne--posun {
+  text-decoration-style: solid;
+  text-decoration-color: hsl(var(--inkoust-3));
+  text-underline-offset: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--inkoust-3) / 0.35);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--inkoust-3) / 0.6);
+}

@@ -1,0 +1,1201 @@
+<title>Nezalžeme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto+Serif:ital,opsz,wght@0,8..144,100..900;1,8..144,100..900&display=swap">
+
+<style>
+/* ============================================================
+   NEZALŽEME — návrh vizuálního systému
+   Tři hlasy, jedna rodina (Roboto):
+     Roboto       = hlas systému (nadpisy, čísla, ovládání)
+     Roboto Serif = hlas poslance (to, co bylo řečeno)
+     Roboto Mono  = hlas záznamu (citace, čas, schůze, tisk)
+   ============================================================ */
+
+:root {
+  /* papír a inkoust */
+  --papir:     #E9EBE4;
+  --list:      #F7F8F3;
+  --list-2:    #FDFDFB;
+  --inkoust:   #16211C;
+  --inkoust-2: #556158;
+  --inkoust-3: #838E86;
+  --linka:     #CFD4CB;
+  --linka-2:   #DEE2D8;
+  --dilek:     #CBD0C6;
+
+  /* jediný interaktivní odstín — petrolej: odkazy, ovládání, ověřeno */
+  --overeno:    #0F5C52;
+  --overeno-tl: rgba(15, 92, 82, 0.10);
+
+  /* jediná signální barva — oxid železa: pouze značka rozporu */
+  --rozpor:    #9E3B25;
+  --rozpor-tl: rgba(158, 59, 37, 0.10);
+
+  --stin: 0 1px 0 rgba(22, 33, 28, 0.04), 0 1px 3px rgba(22, 33, 28, 0.05);
+
+  --sirka: 1180px;
+  --radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papir:     #101512;
+    --list:      #19201B;
+    --list-2:    #202823;
+    --inkoust:   #E7EBE4;
+    --inkoust-2: #9CA79E;
+    --inkoust-3: #6E7A72;
+    --linka:     #2C3831;
+    --linka-2:   #232E28;
+    --dilek:     #39463E;
+    --overeno:    #5CBBA8;
+    --overeno-tl: rgba(92, 187, 168, 0.12);
+    --rozpor:    #E38263;
+    --rozpor-tl: rgba(227, 130, 99, 0.13);
+    --stin: 0 1px 0 rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.3);
+  }
+}
+
+:root[data-theme="dark"] {
+  --papir:     #101512;
+  --list:      #19201B;
+  --list-2:    #202823;
+  --inkoust:   #E7EBE4;
+  --inkoust-2: #9CA79E;
+  --inkoust-3: #6E7A72;
+  --linka:     #2C3831;
+  --linka-2:   #232E28;
+  --dilek:     #39463E;
+  --overeno:    #5CBBA8;
+  --overeno-tl: rgba(92, 187, 168, 0.12);
+  --rozpor:    #E38263;
+  --rozpor-tl: rgba(227, 130, 99, 0.13);
+  --stin: 0 1px 0 rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--papir);
+  color: var(--inkoust);
+  font-family: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--overeno);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+a { color: var(--overeno); }
+
+/* Roboto Serif nese osu optické velikosti — ať se řez ladí podle stupně písma */
+.rec, .uvod__text, .vysvetleni, .udaj__popis, .sekce__pozn,
+.citace, .prazdno, .merid__cislo, .pravidlo__popis, .text-sloupec p,
+.uvod__nadpis em { font-optical-sizing: auto; }
+
+.obal { max-width: var(--sirka); margin: 0 auto; padding: 0 24px; }
+
+/* ---------- upozornění na ukázková data ---------- */
+.demo {
+  background: var(--inkoust);
+  color: var(--papir);
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 7px 0;
+}
+.demo__obal { max-width: var(--sirka); margin: 0 auto; padding: 0 24px;
+  display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.demo__stitek { font-weight: 700; }
+.demo__text { opacity: 0.72; }
+
+/* ---------- hlavička ---------- */
+.mast {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--papir) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--linka);
+}
+.mast__obal {
+  max-width: var(--sirka); margin: 0 auto; padding: 0 24px;
+  height: 66px; display: flex; align-items: center; gap: 28px;
+}
+.znacka {
+  display: flex; flex-direction: column; gap: 1px;
+  text-decoration: none; color: inherit; flex-shrink: 0;
+}
+.znacka__slovo {
+  font-weight: 900; font-size: 19px; letter-spacing: 0.045em;
+  line-height: 1;
+}
+.znacka__pod {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10px; color: var(--inkoust-3); letter-spacing: 0.02em;
+}
+.nav { display: flex; gap: 4px; margin-left: 4px; }
+.nav__odkaz {
+  font-size: 13.5px; font-weight: 600; color: var(--inkoust-2);
+  text-decoration: none; padding: 7px 11px; border-radius: var(--radius);
+  transition: color .12s, background .12s;
+}
+.nav__odkaz:hover { color: var(--inkoust); background: var(--linka-2); }
+.nav__odkaz[aria-current="page"] { color: var(--inkoust); background: var(--linka-2); }
+
+.hledat { margin-left: auto; position: relative; display: flex; align-items: center; }
+.hledat__pole {
+  font-family: inherit; font-size: 13.5px;
+  width: 232px; padding: 9px 12px 9px 32px;
+  background: var(--list); color: var(--inkoust);
+  border: 1px solid var(--linka); border-radius: var(--radius);
+  transition: border-color .12s, width .16s;
+}
+.hledat__pole::placeholder { color: var(--inkoust-3); }
+.hledat__pole:focus { border-color: var(--overeno); outline: none; width: 268px; }
+.hledat__ikona {
+  position: absolute; left: 11px; width: 13px; height: 13px;
+  stroke: var(--inkoust-3); fill: none; stroke-width: 1.8; pointer-events: none;
+}
+.prepinac {
+  margin-left: 8px; width: 34px; height: 34px; flex-shrink: 0;
+  display: grid; place-items: center; cursor: pointer;
+  background: transparent; color: var(--inkoust-2);
+  border: 1px solid var(--linka); border-radius: var(--radius);
+}
+.prepinac:hover { color: var(--inkoust); border-color: var(--inkoust-3); }
+.prepinac svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+
+/* ---------- pásmo záznamu (podpisový prvek) ---------- */
+.pasmo { display: flex; align-items: flex-end; gap: 2px; }
+.dilek {
+  flex: 1 1 auto; min-width: 2px;
+  background: var(--dilek);
+  border-radius: 0.5px;
+}
+.dilek--rozpor { background: var(--rozpor); }
+.dilek--posun  { background: var(--inkoust-3); opacity: 0.8; }
+
+/* ---------- úvod ---------- */
+.uvod { padding: 68px 0 46px; }
+.uvod__mrizka {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 56px; align-items: start;
+}
+.uvod__nadpis {
+  margin: 0; font-weight: 700;
+  font-size: clamp(2.1rem, 4.6vw, 3.15rem);
+  line-height: 1.04; letter-spacing: -0.033em; text-wrap: balance;
+}
+.uvod__nadpis em {
+  font-family: "Roboto Serif", Georgia, serif; font-style: italic;
+  font-weight: 400; letter-spacing: -0.01em;
+}
+.uvod__text {
+  font-family: "Roboto Serif", Georgia, serif;
+  font-size: 18.5px; line-height: 1.58; color: var(--inkoust-2);
+  max-width: 46ch; margin: 22px 0 0;
+}
+.uvod__akce { display: flex; gap: 10px; margin-top: 26px; flex-wrap: wrap; }
+.tlac {
+  font-family: inherit; font-size: 13.5px; font-weight: 650;
+  padding: 11px 18px; border-radius: var(--radius); cursor: pointer;
+  border: 1px solid var(--overeno); background: var(--overeno); color: var(--papir);
+  text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+  transition: opacity .12s;
+}
+.tlac:hover { opacity: 0.87; }
+.tlac--tichy { background: transparent; color: var(--inkoust); border-color: var(--linka); }
+.tlac--tichy:hover { border-color: var(--inkoust-3); opacity: 1; }
+
+/* měřidlo 5 ze 100 */
+.merid {
+  background: var(--list); border: 1px solid var(--linka);
+  border-radius: var(--radius); padding: 26px 26px 22px; box-shadow: var(--stin);
+}
+.merid__stitek {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--inkoust-3);
+}
+.merid__pasmo { height: 46px; margin: 18px 0 16px; gap: 2px; }
+.merid__pasmo .dilek { height: 100%; }
+.merid__cislo {
+  font-size: 15px; line-height: 1.5; color: var(--inkoust-2);
+  font-family: "Roboto Serif", Georgia, serif;
+}
+.merid__cislo b {
+  font-family: "Roboto", sans-serif; font-weight: 800;
+  color: var(--inkoust);
+  font-size: 17px; font-variant-numeric: tabular-nums;
+}
+.merid__nohy {
+  display: flex; gap: 20px; flex-wrap: wrap;
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--linka-2);
+}
+.legenda {
+  display: flex; align-items: center; gap: 7px;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; color: var(--inkoust-2); letter-spacing: 0.01em;
+}
+.legenda__vzorek { width: 9px; height: 15px; border-radius: 1px; background: var(--dilek); }
+.legenda__vzorek--rozpor { background: var(--rozpor); }
+.legenda__vzorek--posun { background: var(--inkoust-3); opacity: 0.8; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .merid__pasmo .dilek { transform: scaleY(0.06); transform-origin: bottom; animation: naskoc .34s cubic-bezier(.2,.7,.3,1) forwards; }
+}
+@keyframes naskoc { to { transform: scaleY(1); } }
+
+/* ---------- rejstřík ---------- */
+.sekce { padding: 10px 0 76px; }
+.sekce__hlava {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap; padding-bottom: 14px;
+}
+.sekce__nadpis {
+  margin: 0; font-size: 21px; font-weight: 700;
+  letter-spacing: -0.018em;
+}
+.sekce__pozn {
+  margin: 5px 0 0; font-size: 13px; color: var(--inkoust-2);
+  font-family: "Roboto Serif", Georgia, serif; max-width: 54ch;
+}
+.radit { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.radit__stitek {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--inkoust-3); margin-right: 2px;
+}
+.chip {
+  font-family: inherit; font-size: 12.5px; font-weight: 600;
+  padding: 7px 12px; cursor: pointer; color: var(--inkoust-2);
+  background: transparent; border: 1px solid var(--linka); border-radius: var(--radius);
+  transition: color .12s, border-color .12s, background .12s;
+}
+.chip:hover { color: var(--inkoust); border-color: var(--inkoust-3); }
+.chip[aria-pressed="true"] {
+  color: var(--overeno); border-color: var(--overeno); background: var(--overeno-tl);
+}
+
+.tabulka { border-top: 1px solid var(--inkoust); }
+.zahlavi {
+  display: grid; grid-template-columns: minmax(180px, 1.5fr) 86px minmax(180px, 2fr) 128px 22px;
+  gap: 18px; align-items: center; padding: 9px 14px;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--inkoust-3); border-bottom: 1px solid var(--linka);
+}
+.radek {
+  display: grid; grid-template-columns: minmax(180px, 1.5fr) 86px minmax(180px, 2fr) 128px 22px;
+  gap: 18px; align-items: center; padding: 15px 14px;
+  border-bottom: 1px solid var(--linka-2);
+  text-decoration: none; color: inherit;
+  transition: background .12s;
+}
+.radek:hover { background: var(--list); }
+.radek:hover .radek__sipka { opacity: 1; transform: translateX(2px); }
+.radek__jmeno { font-size: 15.5px; font-weight: 640; letter-spacing: -0.008em; }
+.radek__role { font-size: 12px; color: var(--inkoust-3); margin-top: 1px; }
+.radek__klub {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11.5px; font-weight: 500; color: var(--inkoust-2); letter-spacing: 0.02em;
+}
+.radek__pasmo { height: 20px; }
+.radek__pasmo .dilek { height: 100%; }
+.radek__cislo {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 12.5px; font-variant-numeric: tabular-nums; text-align: right;
+  color: var(--inkoust-2);
+}
+.radek__cislo b { color: var(--rozpor); font-weight: 700; }
+.radek__cislo--ciste b { color: var(--overeno); }
+.radek__sipka {
+  width: 14px; height: 14px; stroke: var(--inkoust-3); fill: none; stroke-width: 1.8;
+  opacity: 0; transition: opacity .12s, transform .12s;
+}
+.prazdno {
+  padding: 40px 14px; font-family: "Roboto Serif", Georgia, serif;
+  font-size: 16px; color: var(--inkoust-2);
+}
+
+/* ---------- profil poslance ---------- */
+.zpet {
+  display: inline-flex; align-items: center; gap: 7px; margin: 30px 0 22px;
+  font-family: "Roboto Mono", ui-monospace, monospace; font-size: 11.5px;
+  color: var(--inkoust-2); text-decoration: none; letter-spacing: 0.02em;
+}
+.zpet:hover { color: var(--overeno); }
+
+.profil { padding-bottom: 34px; border-bottom: 1px solid var(--inkoust); }
+.profil__jmeno {
+  margin: 0; font-size: clamp(2rem, 4.4vw, 2.9rem); font-weight: 800;
+  letter-spacing: -0.035em; line-height: 1.04;
+}
+.profil__meta {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 12px; color: var(--inkoust-2); margin-top: 9px; letter-spacing: 0.015em;
+}
+.profil__pasmo { height: 34px; margin: 30px 0 12px; gap: 1.5px; }
+.profil__pasmo .dilek { height: 100%; }
+.profil__osa {
+  display: flex; justify-content: space-between;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10px; color: var(--inkoust-3); letter-spacing: 0.05em;
+}
+.souhrn { display: flex; gap: 40px; flex-wrap: wrap; margin-top: 26px; }
+.udaj__cislo {
+  font-size: 34px; font-weight: 800;
+  line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.028em;
+}
+.udaj__cislo--rozpor { color: var(--rozpor); }
+.udaj__popis {
+  font-family: "Roboto Serif", Georgia, serif; font-size: 14px;
+  color: var(--inkoust-2); margin-top: 7px; max-width: 21ch; line-height: 1.4;
+}
+
+/* ---------- záznam rozporu: ŘEČENO ≠ ZÁZNAM ---------- */
+.filtry { display: flex; gap: 6px; flex-wrap: wrap; padding: 26px 0 4px; }
+
+.zaznam { padding: 30px 0; border-bottom: 1px solid var(--linka-2); }
+.zaznam__hlava {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.kategorie {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--rozpor); padding: 4px 8px; border-radius: 2px; background: var(--rozpor-tl);
+}
+.kategorie--posun { color: var(--inkoust-2); background: var(--linka-2); }
+.zaznam__cas {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11.5px; color: var(--inkoust-3); margin-left: auto; letter-spacing: 0.02em;
+}
+
+.dvojice { display: grid; grid-template-columns: 1fr 58px 1fr; align-items: stretch; }
+.karta {
+  background: var(--list); border: 1px solid var(--linka);
+  border-radius: var(--radius); padding: 20px 22px 18px;
+  display: flex; flex-direction: column; gap: 13px; box-shadow: var(--stin);
+}
+.karta--zaznam { border-left: 3px solid var(--rozpor); }
+.karta--posun { border-left: 3px solid var(--inkoust-3); }
+.karta__stitek {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--inkoust-3);
+}
+.rec {
+  font-family: "Roboto Serif", Georgia, serif;
+  font-size: 17.5px; line-height: 1.55; margin: 0; flex: 1;
+}
+.sporne {
+  text-decoration: underline; text-decoration-style: double;
+  text-decoration-color: var(--rozpor); text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.sporne--posun {
+  text-decoration-style: solid; text-decoration-color: var(--inkoust-3);
+  text-underline-offset: 4px;
+}
+.odkaz {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11px; color: var(--overeno); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.01em;
+  border-bottom: 1px solid var(--overeno-tl); padding-bottom: 3px; align-self: flex-start;
+}
+.odkaz:hover { border-bottom-color: var(--overeno); }
+.odkaz svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.spoj { position: relative; display: grid; place-items: center; }
+.spoj::before {
+  content: ""; position: absolute; top: 22px; bottom: 22px; width: 1px; background: var(--linka);
+}
+.spoj__glyf {
+  position: relative; z-index: 1;
+  width: 30px; height: 30px; display: grid; place-items: center;
+  background: var(--papir); border: 1px solid var(--linka); border-radius: 50%;
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 13px; font-weight: 700; color: var(--rozpor);
+}
+.spoj__glyf--posun { color: var(--inkoust-2); }
+
+.zaznam__pata {
+  display: flex; gap: 24px; align-items: flex-start;
+  flex-wrap: wrap; margin-top: 16px;
+}
+.vysvetleni {
+  font-family: "Roboto Serif", Georgia, serif; font-size: 15px; line-height: 1.55;
+  color: var(--inkoust-2); margin: 0; flex: 1 1 400px; max-width: 68ch;
+}
+.karta .vysvetleni { flex: 0 0 auto; }
+.akce { display: flex; gap: 6px; flex: 0 1 auto; flex-wrap: wrap; min-width: 0; }
+.akce__tlac {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: 0.04em; padding: 7px 10px; cursor: pointer;
+  background: transparent; color: var(--inkoust-2);
+  border: 1px solid var(--linka); border-radius: 2px; transition: color .12s, border-color .12s;
+  text-decoration: none; display: inline-flex; align-items: center; line-height: 1;
+}
+.akce__tlac:hover { color: var(--inkoust); border-color: var(--inkoust-3); }
+
+/* ---------- rozprava: bubliny ---------- */
+.rozprava { max-width: 880px; margin: 0 auto; }
+.rozprava__hlava { padding: 30px 0 26px; border-bottom: 1px solid var(--inkoust); }
+.rozprava__tisk {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11px; letter-spacing: 0.05em; color: var(--inkoust-3); text-transform: uppercase;
+}
+.rozprava__nazev {
+  margin: 10px 0 0; font-size: clamp(1.5rem, 3vw, 2.05rem); font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.14;
+  max-width: 24ch; text-wrap: balance;
+}
+.rozprava__pod {
+  font-family: "Roboto Serif", Georgia, serif; font-size: 16px;
+  color: var(--inkoust-2); margin: 12px 0 0; max-width: 62ch;
+}
+
+.vlakno { padding: 12px 0 76px; display: flex; flex-direction: column; }
+.replika { display: grid; grid-template-columns: 128px 1fr; gap: 20px; padding: 22px 0; }
+.replika__kdo { text-align: right; padding-top: 2px; }
+.replika__jmeno { font-size: 14px; font-weight: 640; letter-spacing: -0.008em; }
+.replika__klub {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; color: var(--inkoust-3); margin-top: 2px; letter-spacing: 0.03em;
+}
+.replika__cas {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; color: var(--inkoust-3); margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.bublina {
+  background: var(--list); border: 1px solid var(--linka);
+  border-left: 2px solid var(--inkoust-3); border-radius: var(--radius);
+  padding: 17px 20px 15px; display: flex; flex-direction: column; gap: 12px;
+}
+.bublina--sporna { border-left-color: var(--rozpor); }
+.citace {
+  border-left: 2px solid var(--linka); padding: 2px 0 2px 12px;
+  font-family: "Roboto Serif", Georgia, serif; font-size: 14px;
+  color: var(--inkoust-3); font-style: italic;
+}
+.citace b { font-style: normal; font-family: "Roboto", sans-serif; font-weight: 620; color: var(--inkoust-2); }
+.bublina__pata {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding-top: 11px; border-top: 1px solid var(--linka-2);
+}
+.rozbal {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: 0.04em; cursor: pointer;
+  background: transparent; color: var(--rozpor);
+  border: 1px solid var(--rozpor); border-radius: 2px; padding: 6px 10px;
+  display: inline-flex; align-items: center; gap: 7px; transition: background .12s;
+}
+.rozbal:hover { background: var(--rozpor-tl); }
+.rozbal__znak { font-weight: 700; }
+.duk { margin-top: 0; }
+.duk[hidden] { display: none; }
+.duk__spoj { position: relative; height: 34px; display: flex; align-items: center; padding-left: 30px; }
+.duk__spoj::before { content: ""; position: absolute; left: 44px; top: 0; bottom: 0; width: 1px; background: var(--linka); }
+.duk__hlava { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.ciste {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 10.5px; color: var(--inkoust-3); letter-spacing: 0.03em;
+}
+
+/* ---------- metodika ---------- */
+.text-sloupec { max-width: 66ch; padding: 34px 0 80px; }
+.text-sloupec h2 {
+  font-size: 20px; font-weight: 700;
+  letter-spacing: -0.018em; margin: 38px 0 10px;
+}
+.text-sloupec h2:first-child { margin-top: 0; }
+.text-sloupec p {
+  font-family: "Roboto Serif", Georgia, serif; font-size: 17px; line-height: 1.62;
+  color: var(--inkoust-2); margin: 0 0 14px;
+}
+.text-sloupec strong { color: var(--inkoust); font-weight: 600; }
+.pravidla { display: flex; flex-direction: column; gap: 0; margin: 18px 0 0; }
+.pravidlo {
+  display: grid; grid-template-columns: 210px 1fr; gap: 22px;
+  padding: 16px 0; border-top: 1px solid var(--linka-2); align-items: start;
+}
+.pravidlo__nazev {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--rozpor); padding-top: 3px;
+}
+.pravidlo__nazev--posun { color: var(--inkoust-2); }
+.pravidlo__popis {
+  font-family: "Roboto Serif", Georgia, serif; font-size: 15.5px;
+  line-height: 1.55; color: var(--inkoust-2);
+}
+
+/* ---------- pata ---------- */
+.pata { border-top: 1px solid var(--linka); padding: 34px 0 46px; }
+.pata__obal {
+  max-width: var(--sirka); margin: 0 auto; padding: 0 24px;
+  display: flex; gap: 30px; justify-content: space-between; flex-wrap: wrap;
+}
+.pata__text {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  font-size: 11px; line-height: 1.9; color: var(--inkoust-3); letter-spacing: 0.01em;
+  max-width: 46ch;
+}
+.pata__text a { color: var(--inkoust-2); }
+
+/* ---------- oznámení ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 14px);
+  background: var(--inkoust); color: var(--papir);
+  font-family: "Roboto Mono", ui-monospace, monospace; font-size: 11.5px;
+  padding: 10px 16px; border-radius: var(--radius); z-index: 60;
+  opacity: 0; pointer-events: none; transition: opacity .16s, transform .16s;
+}
+.toast.je-videt { opacity: 1; transform: translate(-50%, 0); }
+
+.pohled[hidden] { display: none; }
+
+/* ---------- responzivita ---------- */
+@media (max-width: 900px) {
+  .uvod__mrizka { grid-template-columns: 1fr; gap: 34px; }
+  .uvod { padding: 44px 0 34px; }
+  .zahlavi { display: none; }
+  .radek {
+    grid-template-columns: 1fr auto; grid-template-areas: "jmeno cislo" "pasmo pasmo";
+    gap: 12px; padding: 16px 10px;
+  }
+  .radek__jmeno-blok { grid-area: jmeno; }
+  .radek__klub { display: none; }
+  .radek__pasmo { grid-area: pasmo; height: 16px; }
+  .radek__cislo { grid-area: cislo; }
+  .radek__sipka { display: none; }
+  .dvojice { grid-template-columns: 1fr; }
+  .spoj { padding: 0; height: 44px; }
+  .spoj::before { top: 0; bottom: 0; left: 50%; width: 1px; }
+  .karta--zaznam, .karta--posun { border-left-width: 1px; border-top: 3px solid var(--rozpor); }
+  .karta--posun { border-top-color: var(--inkoust-3); }
+  .replika { grid-template-columns: 1fr; gap: 9px; }
+  .replika__kdo { text-align: left; display: flex; align-items: baseline; gap: 10px; }
+  .replika__klub, .replika__cas { margin-top: 0; }
+  .pravidlo { grid-template-columns: 1fr; gap: 6px; }
+  .souhrn { gap: 26px; }
+  .merid__pasmo { flex-wrap: wrap; height: auto; gap: 2px; row-gap: 5px; align-items: stretch; }
+  .merid__pasmo .dilek { flex: 0 0 calc((100% - 98px) / 50); height: 24px; }
+  .profil__pasmo { flex-wrap: wrap; height: auto; gap: 2px; align-items: flex-start; }
+  .profil__pasmo .dilek { flex: 0 0 4px; height: 13px; }
+  .profil__osa { display: none; }
+  .nav { display: none; }
+  .znacka__pod { display: none; }
+  .mast__obal { gap: 12px; height: 58px; }
+  .hledat { min-width: 0; flex: 1 1 auto; }
+  .hledat__pole { width: 100%; max-width: 210px; }
+  .hledat__pole:focus { width: 100%; }
+  .souhrn { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .udaj__cislo { font-size: 27px; }
+  .udaj__popis { max-width: none; font-size: 12.5px; }
+  .zaznam__cas { margin-left: 0; width: 100%; }
+}
+</style>
+
+<div class="demo">
+  <div class="demo__obal">
+    <span class="demo__stitek">UKÁZKOVÁ DATA</span>
+    <span class="demo__text">Jména, kluby i výroky na této stránce jsou smyšlené. Slouží k předvedení designu, ne k hodnocení skutečných politiků.</span>
+  </div>
+</div>
+
+<header class="mast">
+  <div class="mast__obal">
+    <a class="znacka" href="#rejstrik">
+      <span class="znacka__slovo">NEZALŽEME</span>
+      <span class="znacka__pod">veřejná kontrola výroků v Poslanecké sněmovně</span>
+    </a>
+    <nav class="nav" aria-label="Hlavní">
+      <a class="nav__odkaz" href="#rejstrik" data-nav="rejstrik">Rejstřík</a>
+      <a class="nav__odkaz" href="#rozprava" data-nav="rozprava">Rozpravy</a>
+      <a class="nav__odkaz" href="#metodika" data-nav="metodika">Metodika</a>
+    </nav>
+    <div class="hledat">
+      <svg class="hledat__ikona" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"></circle><path d="M11 11l4 4"></path></svg>
+      <input class="hledat__pole" id="hledat" type="search" placeholder="Najít poslance" aria-label="Najít poslance">
+    </div>
+    <button class="prepinac" id="prepinac" type="button" aria-label="Přepnout motiv">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ REJSTŘÍK ============ -->
+  <section class="pohled" id="pohled-rejstrik">
+    <div class="obal">
+      <div class="uvod">
+        <div class="uvod__mrizka">
+          <div>
+            <h1 class="uvod__nadpis">Ke každému výroku patří <em>záznam</em>.</h1>
+            <p class="uvod__text">Porovnáváme, co poslanci říkají ve Sněmovně, s tím, co řekli dřív a jak potom hlasovali. U každé značky je odkaz na přesné místo ve stenozáznamu, takže si to každý ověří sám.</p>
+            <div class="uvod__akce">
+              <button class="tlac" type="button" id="k-rejstriku">Otevřít rejstřík poslanců</button>
+              <a class="tlac tlac--tichy" href="#metodika">Jak to ověřujeme</a>
+            </div>
+          </div>
+          <div class="merid">
+            <div class="merid__stitek">9. volební období · 100 vystoupení</div>
+            <div class="pasmo merid__pasmo" id="merid-pasmo" role="img" aria-label="Z každých sta vystoupení se pět rozchází se záznamem a tři znamenají změnu postoje."></div>
+            <p class="merid__cislo">Z každých <b>100</b> vystoupení se <b>5</b> rozchází s dřívějším výrokem nebo s hlasováním téhož poslance. U dalších <b>3</b> jde o doloženou změnu postoje.</p>
+            <div class="merid__nohy">
+              <span class="legenda"><span class="legenda__vzorek"></span>bez námitky</span>
+              <span class="legenda"><span class="legenda__vzorek legenda__vzorek--rozpor"></span>rozpor se záznamem</span>
+              <span class="legenda"><span class="legenda__vzorek legenda__vzorek--posun"></span>změna postoje</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sekce">
+        <div class="sekce__hlava">
+          <div>
+            <h2 class="sekce__nadpis">Rejstřík poslanců</h2>
+            <p class="sekce__pozn">Řadíme abecedně a měříme všechny kluby stejným pravidlem. Pořadí neurčuje redakce — přeřaďte si ho sami.</p>
+          </div>
+          <div class="radit">
+            <span class="radit__stitek">Řadit</span>
+            <button class="chip" type="button" data-radit="abeceda" aria-pressed="true">Abecedně</button>
+            <button class="chip" type="button" data-radit="podil" aria-pressed="false">Podíl rozporů</button>
+            <button class="chip" type="button" data-radit="overeno" aria-pressed="false">Počet ověřených výroků</button>
+          </div>
+        </div>
+
+        <div class="tabulka">
+          <div class="zahlavi" aria-hidden="true">
+            <span>Poslanec</span>
+            <span>Klub</span>
+            <span>Posledních 40 vystoupení</span>
+            <span style="text-align:right">Rozpory / ověřeno</span>
+            <span></span>
+          </div>
+          <div id="rejstrik-telo"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROFIL POSLANCE ============ -->
+  <section class="pohled" id="pohled-poslanec" hidden>
+    <div class="obal">
+      <a class="zpet" href="#rejstrik">← Zpět do rejstříku</a>
+      <div class="profil">
+        <h1 class="profil__jmeno" id="profil-jmeno"></h1>
+        <div class="profil__meta" id="profil-meta"></div>
+        <div class="pasmo profil__pasmo" id="profil-pasmo" role="img"></div>
+        <div class="profil__osa">
+          <span id="profil-od"></span>
+          <span>každý dílek = jedno ověřené vystoupení</span>
+          <span>dnes</span>
+        </div>
+        <div class="souhrn" id="profil-souhrn"></div>
+      </div>
+      <div class="filtry" id="profil-filtry"></div>
+      <div id="profil-zaznamy"></div>
+    </div>
+  </section>
+
+  <!-- ============ ROZPRAVA ============ -->
+  <section class="pohled" id="pohled-rozprava" hidden>
+    <div class="obal">
+      <div class="rozprava">
+      <div class="rozprava__hlava">
+        <div class="rozprava__tisk">Sněmovní tisk 488 · 84. schůze · 12. června 2024 · 2. čtení</div>
+        <h1 class="rozprava__nazev">Návrh zákona o úpravě rozpočtových pravidel</h1>
+        <p class="rozprava__pod">Rozprava tak, jak proběhla. Zvýrazněné části mají v záznamu protějšek — rozbalte ho přímo v místě, kde slova padla.</p>
+      </div>
+      <div class="vlakno" id="vlakno"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ METODIKA ============ -->
+  <section class="pohled" id="pohled-metodika" hidden>
+    <div class="obal">
+      <div class="text-sloupec">
+        <h2>Co porovnáváme</h2>
+        <p>Bereme stenozáznamy Poslanecké sněmovny a záznamy hlasování — obojí jsou veřejná data na psp.cz. Každý věcný výrok porovnáme s tím, co <strong>týž poslanec</strong> řekl dřív ke stejné věci, a s tím, jak o ní hlasoval.</p>
+        <p>Neposuzujeme názory, ideologii ani to, jestli byl návrh dobrý. Posuzujeme jedinou věc: <strong>drží řečník to, co sám dřív řekl a udělal?</strong> Tohle pravidlo platí pro koalici i opozici beze zbytku stejně.</p>
+
+        <h2>Čtyři značky</h2>
+        <div class="pravidla">
+          <div class="pravidlo">
+            <div class="pravidlo__nazev">Opak dřívějšího výroku</div>
+            <div class="pravidlo__popis">Ke stejné věci týž poslanec dřív tvrdil pravý opak. Doložíme oba stenozáznamy.</div>
+          </div>
+          <div class="pravidlo">
+            <div class="pravidlo__nazev">Rozpor s hlasováním</div>
+            <div class="pravidlo__popis">Výrok neodpovídá tomu, jak poslanec o téže věci hlasoval. Doložíme číslo hlasování a tisk.</div>
+          </div>
+          <div class="pravidlo">
+            <div class="pravidlo__nazev">Údaj neodpovídá zdroji</div>
+            <div class="pravidlo__popis">Číslo nebo fakt se rozchází s ověřitelným veřejným zdrojem — ČSÚ, ČNB, Eurostat, NKÚ. Doložíme zdroj i datum.</div>
+          </div>
+          <div class="pravidlo">
+            <div class="pravidlo__nazev pravidlo__nazev--posun">Změna postoje</div>
+            <div class="pravidlo__popis">Postoj se v čase posunul. <strong>Nezapočítává se mezi rozpory</strong> — měnit názor je legitimní. Zaznamenáváme ji jen proto, aby byl vývoj dohledatelný.</div>
+          </div>
+        </div>
+
+        <h2>Proč vidíte jmenovatele</h2>
+        <p>U každého poslance je vždycky vidět, kolik vystoupení jsme prošli. Bez toho by vycházel hůř ten, kdo mluví často — a to by nebylo poctivé měření, ale jen měření výřečnosti.</p>
+
+        <h2>Nadsázku neznačíme</h2>
+        <p>Ironii, metaforu a řečnickou nadsázku nepovažujeme za tvrzení. Značíme jen to, co je míněné jako fakt.</p>
+
+        <h2>Když se spleteme</h2>
+        <p>U každé značky je tlačítko <strong>Namítnout</strong>. Námitku vyřídíme do 14 dnů a stažené značky zůstávají veřejně dohledatelné i s odůvodněním. Systém, který neumí přiznat chybu, nemá právo hlídat cizí.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pata">
+  <div class="pata__obal">
+    <div class="pata__text">
+      NEZALŽEME.CZ<br>
+      Zdroj dat: stenoprotokoly a hlasování Poslanecké sněmovny Parlamentu ČR (<a href="https://www.psp.cz/eknih/" target="_blank" rel="noopener">psp.cz/eknih</a>). Veřejná data.
+    </div>
+    <div class="pata__text">
+      <a href="#metodika">Metodika</a> · <a href="#metodika">Namítnout značku</a> · <a href="#rejstrik">Rejstřík</a><br>
+      Návrh designu, srpen 2026. Ukázková data.
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============ data (smyšlená, jen pro předvedení designu) ============ */
+
+const POSLANCI = [
+  { id:"bilek",    jmeno:"Tomáš Bílek",     prijmeni:"Bílek",     krestni:"Tomáš", klub:"NEZ",  role:"nezařazený poslanec",       overeno:226, rozpor:12, posun:5,
+    poslednich40:{ rozpor:[2,9,15,23,31,38], posun:[6,27] } },
+  { id:"dolezal",  jmeno:"Martin Doležal",  prijmeni:"Doležal",   krestni:"Martin", klub:"HNP",  role:"předseda poslaneckého klubu", overeno:198, rozpor:6, posun:3,
+    poslednich40:{ rozpor:[5,18,29], posun:[12,34] } },
+  { id:"kovarova", jmeno:"Alena Kovářová",  prijmeni:"Kovářová",  krestni:"Alena", klub:"ODU",  role:"místopředsedkyně vlády",    overeno:214, rozpor:9, posun:4,
+    poslednich40:{ rozpor:[3,17,26,35], posun:[10,29] } },
+  { id:"maresova", jmeno:"Petra Marešová",  prijmeni:"Marešová",  krestni:"Petra", klub:"KLS",  role:"poslankyně",                overeno:143, rozpor:0, posun:1,
+    poslednich40:{ rozpor:[], posun:[21] } },
+  { id:"nedvedova",jmeno:"Věra Nedvědová",  prijmeni:"Nedvědová", krestni:"Věra", klub:"SDL",  role:"předsedkyně rozpočtového výboru", overeno:95, rozpor:1, posun:2,
+    poslednich40:{ rozpor:[24], posun:[8,33] } },
+  { id:"simkova",  jmeno:"Hana Šimková",    prijmeni:"Šimková",   krestni:"Hana", klub:"ODU",  role:"poslankyně",                overeno:109, rozpor:2, posun:0,
+    poslednich40:{ rozpor:[14,30], posun:[] } },
+  { id:"soucek",   jmeno:"Radek Souček",    prijmeni:"Souček",    krestni:"Radek", klub:"HNP",  role:"ministr dopravy",           overeno:187, rozpor:3, posun:6,
+    poslednich40:{ rozpor:[7,22], posun:[3,16,28,36] } },
+  { id:"vrana",    jmeno:"Jiří Vrána",      prijmeni:"Vrána",     krestni:"Jiří", klub:"SDL",  role:"ministr financí",           overeno:172, rozpor:4, posun:2,
+    poslednich40:{ rozpor:[11,19,32], posun:[25] } }
+];
+
+const ZAZNAMY = {
+  kovarova: [
+    {
+      kat: "Rozpor s hlasováním", typ: "hlasovani", glyf: "≠",
+      cas: "12. 6. 2024 · 84. schůze · 14:32",
+      receno: { pred: "Náš klub vždycky hájil nízké přímé daně pro zaměstnance a rodiny s dětmi. ",
+                sporne: "Nikdy jsme nepodpořili nic, co by lidem sáhlo na výplatu",
+                po: ", a nepodpoříme to ani teď." },
+      recenoOdkaz: "psp.cz · 84. schůze · s084042, odst. 14",
+      zaznam: "Hlasování č. 112 k tisku 509, 6. 11. 2023: Kovářová A. — PRO. Tisk zvýšil spotřební daň a zrušil slevu na poplatníka u druhého vyživovaného dítěte.",
+      zaznamOdkaz: "psp.cz · 71. schůze · hlasování 112",
+      vysvetleni: "Výrok se týká hlasování, které proběhlo sedm měsíců před ním. Neposuzujeme, jestli byl tisk 509 správný — jen že mu výrok odporuje."
+    },
+    {
+      kat: "Opak dřívějšího výroku", typ: "opak", glyf: "≠",
+      cas: "12. 6. 2024 · 84. schůze · 14:41",
+      receno: { pred: "Zdanění nemovitostí je zásah do majetku, který si lidé pořídili z už jednou zdaněných peněz. ",
+                sporne: "Majetková daň je z principu nespravedlivá",
+                po: " a my ji zvyšovat nebudeme." },
+      recenoOdkaz: "psp.cz · 84. schůze · s084042, odst. 31",
+      zaznam: "„Vyšší daň z nemovitosti je nejspravedlivější daň, jakou máme. Zatěžuje majetek, ne práci.“ — tatáž řečnice, 14. 5. 2021.",
+      zaznamOdkaz: "psp.cz · 53. schůze · s053012, odst. 21",
+      vysvetleni: "Obě vystoupení se týkají téže daně a téhož paragrafu. Mezi nimi neproběhla žádná změna zákona, která by rozdíl vysvětlovala."
+    },
+    {
+      kat: "Změna postoje", typ: "posun", glyf: "→",
+      cas: "12. 6. 2024 · 84. schůze · 14:47",
+      receno: { pred: "Dnes jsem přesvědčená, že ", sporne: "jednotná sazba DPH je pro rodiny výhodnější", po: " než dosavadní dvě sazby." },
+      recenoOdkaz: "psp.cz · 84. schůze · s084042, odst. 52",
+      zaznam: "„Dvě sazby DPH chrání základní potraviny. Sjednocení by dopadlo na ty nejchudší.“ — tatáž řečnice, 9. 3. 2022.",
+      zaznamOdkaz: "psp.cz · 61. schůze · s061077, odst. 9",
+      vysvetleni: "Změna postoje se nezapočítává mezi rozpory. Zaznamenáváme ji, aby byl vývoj názoru dohledatelný — ne aby byl trestán."
+    }
+  ]
+};
+
+const ROZPRAVA = [
+  { kdo:"Jiří Vrána", klub:"SDL", role:"ministr financí", cas:"14:15",
+    text:[{t:"Předkládám návrh, který srovná rozpočtová pravidla napříč kapitolami. "},
+          {t:"Nezvyšujeme celkovou daňovou zátěž", sporne:true},
+          {t:", jen zpřesňujeme, kdo za co odpovídá."}],
+    odkaz:"psp.cz · 84. schůze · s084041, odst. 6",
+    duk:{ glyf:"≠", kat:"Rozpor s hlasováním",
+          zaznam:"Hlasování č. 204 k tisku 488, 12. 6. 2024: Vrána J. — PRO. Tisk zvyšuje sazbu DPPO z 19 % na 21 %.",
+          odkaz:"psp.cz · 84. schůze · hlasování 204",
+          vysvetleni:"Řečník hlasoval pro tisk se zvýšením sazby DPPO ve stejný den, kdy pronesl tento výrok." } },
+
+  { kdo:"Alena Kovářová", klub:"ODU", role:"místopředsedkyně vlády", cas:"14:32",
+    reagujeNa:{ kdo:"Jiří Vrána", cas:"14:15", uryvek:"Nezvyšujeme celkovou daňovou zátěž…" },
+    text:[{t:"Pan ministr tady mluví o zpřesňování. Náš klub vždycky hájil nízké přímé daně pro zaměstnance a rodiny s dětmi. "},
+          {t:"Nikdy jsme nepodpořili nic, co by lidem sáhlo na výplatu", sporne:true},
+          {t:", a nepodpoříme to ani teď."}],
+    odkaz:"psp.cz · 84. schůze · s084042, odst. 14",
+    duk:{ glyf:"≠", kat:"Rozpor s hlasováním",
+          zaznam:"Hlasování č. 112 k tisku 509, 6. 11. 2023: Kovářová A. — PRO. Tisk zvýšil spotřební daň a zrušil slevu na poplatníka u druhého vyživovaného dítěte.",
+          odkaz:"psp.cz · 71. schůze · hlasování 112",
+          vysvetleni:"Výrok se týká hlasování, které proběhlo sedm měsíců před ním." } },
+
+  { kdo:"Petra Marešová", klub:"KLS", role:"poslankyně", cas:"14:38",
+    reagujeNa:{ kdo:"Alena Kovářová", cas:"14:32", uryvek:"Nikdy jsme nepodpořili nic, co by lidem sáhlo na výplatu…" },
+    text:[{t:"Zeptám se věcně, protože z rozpravy to zatím nezaznělo: kolik obcí podle propočtu ministerstva přijde o víc než desetinu příjmů? V důvodové zprávě to číslo není."}],
+    odkaz:"psp.cz · 84. schůze · s084042, odst. 27" },
+
+  { kdo:"Radek Souček", klub:"HNP", role:"ministr dopravy", cas:"14:44",
+    text:[{t:"Doplním za resort dopravy. "},
+          {t:"Investice do železnice loni klesly o víc než polovinu", sporne:true},
+          {t:", což tenhle návrh nijak neřeší."}],
+    odkaz:"psp.cz · 84. schůze · s084043, odst. 3",
+    duk:{ glyf:"≠", kat:"Údaj neodpovídá zdroji",
+          zaznam:"Státní fond dopravní infrastruktury, výroční zpráva 2023: investice do železniční infrastruktury 61,4 mld. Kč oproti 68,2 mld. Kč v roce 2022 — pokles o 10 %.",
+          odkaz:"sfdi.cz · výroční zpráva 2023, s. 24",
+          vysvetleni:"Uváděný pokles je zhruba pětinásobek doloženého. Zdroj je veřejný a byl v době vystoupení k dispozici." } },
+
+  { kdo:"Věra Nedvědová", klub:"SDL", role:"předsedkyně rozpočtového výboru", cas:"14:51",
+    reagujeNa:{ kdo:"Petra Marešová", cas:"14:38", uryvek:"kolik obcí přijde o víc než desetinu příjmů?…" },
+    text:[{t:"Na dotaz kolegyně Marešové: podle propočtu výboru jde o 43 obcí, seznam je přílohou usnesení číslo 118. Rozešlu ho všem klubům do konce dnešního jednání."}],
+    odkaz:"psp.cz · 84. schůze · s084043, odst. 19" }
+];
+
+/* ============ pásmo záznamu ============ */
+
+function pasmo(el, pocet, rozporIdx, posunIdx, sirkaDilku) {
+  const r = new Set(rozporIdx), p = new Set(posunIdx);
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < pocet; i++) {
+    const d = document.createElement("span");
+    d.className = "dilek" + (r.has(i) ? " dilek--rozpor" : p.has(i) ? " dilek--posun" : "");
+    if (sirkaDilku) { d.style.flex = "0 0 " + sirkaDilku + "px"; }
+    frag.appendChild(d);
+  }
+  el.replaceChildren(frag);
+}
+
+/* deterministické rozprostření značek po celém období */
+function rozprostri(pocet, kolik, seed) {
+  const out = [];
+  let s = seed * 9301 + 49297;
+  for (let i = 0; i < kolik; i++) {
+    s = (s * 9301 + 49297) % 233280;
+    const zaklad = Math.floor((i + 0.5) * pocet / kolik);
+    const posun = Math.floor((s / 233280) * (pocet / kolik) * 0.8) - Math.floor((pocet / kolik) * 0.4);
+    out.push(Math.max(0, Math.min(pocet - 1, zaklad + posun)));
+  }
+  return out;
+}
+
+/* ============ rejstřík ============ */
+
+const telo = document.getElementById("rejstrik-telo");
+let radit = "abeceda";
+let dotaz = "";
+
+function vykresliRejstrik() {
+  let sez = POSLANCI.filter(p =>
+    (p.jmeno + " " + p.klub + " " + p.role).toLocaleLowerCase("cs").includes(dotaz)
+  );
+  if (radit === "abeceda") {
+    sez.sort((a, b) => a.prijmeni.localeCompare(b.prijmeni, "cs"));
+  } else if (radit === "podil") {
+    sez.sort((a, b) => (b.rozpor / b.overeno) - (a.rozpor / a.overeno));
+  } else {
+    sez.sort((a, b) => b.overeno - a.overeno);
+  }
+
+  if (!sez.length) {
+    telo.innerHTML = '<p class="prazdno">Nikoho takového v rejstříku nemáme. Zkuste jen příjmení.</p>';
+    return;
+  }
+
+  telo.replaceChildren(...sez.map(p => {
+    const a = document.createElement("a");
+    a.className = "radek";
+    a.href = "#poslanec/" + p.id;
+    a.innerHTML =
+      '<div class="radek__jmeno-blok">' +
+        '<div class="radek__jmeno">' + p.prijmeni + ', ' + p.krestni + '</div>' +
+        '<div class="radek__role">' + p.role + '</div>' +
+      '</div>' +
+      '<div class="radek__klub">' + p.klub + '</div>' +
+      '<div class="pasmo radek__pasmo" role="img" aria-label="Posledních 40 vystoupení: ' +
+        p.poslednich40.rozpor.length + ' v rozporu se záznamem."></div>' +
+      '<div class="radek__cislo' + (p.rozpor === 0 ? ' radek__cislo--ciste' : '') + '">' +
+        '<b>' + p.rozpor + '</b> / ' + p.overeno + '</div>' +
+      '<svg class="radek__sipka" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2l6 6-6 6"></path></svg>';
+    pasmo(a.querySelector(".radek__pasmo"), 40, p.poslednich40.rozpor, p.poslednich40.posun);
+    return a;
+  }));
+}
+
+document.querySelectorAll("[data-radit]").forEach(b => {
+  b.addEventListener("click", () => {
+    radit = b.dataset.radit;
+    document.querySelectorAll("[data-radit]").forEach(x =>
+      x.setAttribute("aria-pressed", String(x === b)));
+    vykresliRejstrik();
+  });
+});
+
+document.getElementById("hledat").addEventListener("input", e => {
+  dotaz = e.target.value.trim().toLocaleLowerCase("cs");
+  if (dotaz && !location.hash.startsWith("#rejstrik")) location.hash = "#rejstrik";
+  vykresliRejstrik();
+});
+
+/* ============ profil poslance ============ */
+
+let profilFiltr = "vse";
+
+function vykresliProfil(id) {
+  const p = POSLANCI.find(x => x.id === id) || POSLANCI[2];
+  document.getElementById("profil-jmeno").textContent = p.jmeno;
+  document.getElementById("profil-meta").textContent =
+    p.klub + " · " + p.role + " · 9. volební období";
+  document.getElementById("profil-od").textContent = "říjen 2021";
+
+  const pas = document.getElementById("profil-pasmo");
+  pas.setAttribute("aria-label",
+    p.jmeno + ": " + p.overeno + " ověřených vystoupení, " + p.rozpor +
+    " v rozporu se záznamem, " + p.posun + " změn postoje.");
+  pasmo(pas, p.overeno,
+    rozprostri(p.overeno, p.rozpor, p.jmeno.length + 3),
+    rozprostri(p.overeno, p.posun, p.jmeno.length + 11));
+
+  document.getElementById("profil-souhrn").innerHTML =
+    '<div class="udaj"><div class="udaj__cislo udaj__cislo--rozpor">' + p.rozpor + '</div>' +
+      '<div class="udaj__popis">výroků v rozporu se záznamem</div></div>' +
+    '<div class="udaj"><div class="udaj__cislo">' + p.posun + '</div>' +
+      '<div class="udaj__popis">doložených změn postoje</div></div>' +
+    '<div class="udaj"><div class="udaj__cislo">' + (p.overeno - p.rozpor - p.posun) + '</div>' +
+      '<div class="udaj__popis">vystoupení bez námitky</div></div>';
+
+  const zaz = ZAZNAMY[p.id] || [];
+  const pocty = {
+    vse: zaz.length,
+    opak: zaz.filter(z => z.typ === "opak").length,
+    hlasovani: zaz.filter(z => z.typ === "hlasovani").length,
+    posun: zaz.filter(z => z.typ === "posun").length
+  };
+  const filtry = [
+    ["vse", "Vše"], ["opak", "Opak dřívějšího výroku"],
+    ["hlasovani", "Rozpor s hlasováním"], ["posun", "Změna postoje"]
+  ];
+  const fEl = document.getElementById("profil-filtry");
+  fEl.replaceChildren(...filtry.map(([k, n]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.textContent = n + " (" + (pocty[k] || 0) + ")";
+    b.setAttribute("aria-pressed", String(k === profilFiltr));
+    b.addEventListener("click", () => { profilFiltr = k; vykresliProfil(id); });
+    return b;
+  }));
+
+  const vidi = zaz.filter(z => profilFiltr === "vse" || z.typ === profilFiltr);
+  const cil = document.getElementById("profil-zaznamy");
+
+  if (!vidi.length) {
+    let zprava;
+    if (zaz.length) zprava = "V tomto výběru nic není. Zkuste jinou značku.";
+    else if (p.rozpor === 0 && p.posun === 0)
+      zprava = "U " + p.overeno + " ověřených vystoupení jsme zatím nenašli rozpor se záznamem. Kontrolujeme dál.";
+    else zprava = "V této ukázce jsou jednotlivé záznamy rozepsané jen u Aleny Kovářové. " +
+      "V ostré verzi tu bude všech " + (p.rozpor + p.posun) + " značek.";
+    cil.innerHTML = '<p class="prazdno">' + zprava + '</p>';
+    return;
+  }
+
+  cil.replaceChildren(...vidi.map(z => {
+    const el = document.createElement("article");
+    el.className = "zaznam";
+    const posun = z.typ === "posun";
+    el.innerHTML =
+      '<div class="zaznam__hlava">' +
+        '<span class="kategorie' + (posun ? ' kategorie--posun' : '') + '">' + z.kat + '</span>' +
+        '<span class="zaznam__cas">' + z.cas + '</span>' +
+      '</div>' +
+      '<div class="dvojice">' +
+        '<div class="karta">' +
+          '<span class="karta__stitek">Řečeno</span>' +
+          '<p class="rec">„' + z.receno.pred +
+            '<span class="sporne' + (posun ? ' sporne--posun' : '') + '">' + z.receno.sporne + '</span>' +
+            z.receno.po + '“</p>' +
+          odkazHtml(z.recenoOdkaz) +
+        '</div>' +
+        '<div class="spoj"><span class="spoj__glyf' + (posun ? ' spoj__glyf--posun' : '') + '">' + z.glyf + '</span></div>' +
+        '<div class="karta ' + (posun ? 'karta--posun' : 'karta--zaznam') + '">' +
+          '<span class="karta__stitek">Záznam</span>' +
+          '<p class="rec">' + z.zaznam + '</p>' +
+          odkazHtml(z.zaznamOdkaz) +
+        '</div>' +
+      '</div>' +
+      '<div class="zaznam__pata">' +
+        '<p class="vysvetleni">' + z.vysvetleni + '</p>' +
+        '<div class="akce">' +
+          '<a class="akce__tlac" href="#rozprava">Zobrazit v rozpravě</a>' +
+          '<button class="akce__tlac" type="button" data-kopie>Zkopírovat odkaz</button>' +
+          '<button class="akce__tlac" type="button" data-namitka>Namítnout</button>' +
+        '</div>' +
+      '</div>';
+    return el;
+  }));
+}
+
+function odkazHtml(t) {
+  return '<a class="odkaz" href="https://www.psp.cz/eknih/" target="_blank" rel="noopener">' + t +
+    '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2h6v6"></path><path d="M10 2L2 10"></path></svg></a>';
+}
+
+/* ============ rozprava ============ */
+
+function vykresliRozpravu() {
+  const cil = document.getElementById("vlakno");
+  cil.replaceChildren(...ROZPRAVA.map((r, i) => {
+    const el = document.createElement("div");
+    el.className = "replika";
+    const text = r.text.map(c => c.sporne
+      ? '<span class="sporne">' + c.t + '</span>' : c.t).join("");
+
+    el.innerHTML =
+      '<div class="replika__kdo">' +
+        '<div class="replika__jmeno">' + r.kdo + '</div>' +
+        '<div class="replika__klub">' + r.klub + '</div>' +
+        '<div class="replika__cas">' + r.cas + '</div>' +
+      '</div>' +
+      '<div>' +
+        '<div class="bublina' + (r.duk ? ' bublina--sporna' : '') + '">' +
+          (r.reagujeNa
+            ? '<div class="citace"><b>' + r.reagujeNa.kdo + ', ' + r.reagujeNa.cas + ':</b> ' +
+              r.reagujeNa.uryvek + '</div>'
+            : '') +
+          '<p class="rec">' + text + '</p>' +
+          '<div class="bublina__pata">' +
+            odkazHtml(r.odkaz) +
+            (r.duk
+              ? '<button class="rozbal" type="button" aria-expanded="false" data-rozbal="' + i + '">' +
+                  '<span class="rozbal__znak">' + r.duk.glyf + '</span> Zobrazit záznam</button>'
+              : '<span class="ciste">bez námitky</span>') +
+          '</div>' +
+        '</div>' +
+        (r.duk ? '<div class="duk" id="duk-' + i + '" hidden>' +
+          '<div class="duk__spoj"><span class="spoj__glyf">' + r.duk.glyf + '</span></div>' +
+          '<div class="karta karta--zaznam">' +
+            '<div class="duk__hlava">' +
+              '<span class="kategorie">' + r.duk.kat + '</span>' +
+              '<span class="karta__stitek">Záznam</span>' +
+            '</div>' +
+            '<p class="rec">' + r.duk.zaznam + '</p>' +
+            odkazHtml(r.duk.odkaz) +
+            '<p class="vysvetleni">' + r.duk.vysvetleni + '</p>' +
+            '<div class="akce">' +
+              '<button class="akce__tlac" type="button" data-kopie>Zkopírovat odkaz</button>' +
+              '<button class="akce__tlac" type="button" data-namitka>Namítnout</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' : '') +
+      '</div>';
+    return el;
+  }));
+}
+
+/* ============ interakce ============ */
+
+document.addEventListener("click", e => {
+  const roz = e.target.closest("[data-rozbal]");
+  if (roz) {
+    const p = document.getElementById("duk-" + roz.dataset.rozbal);
+    const otevreno = !p.hidden;
+    p.hidden = otevreno;
+    roz.setAttribute("aria-expanded", String(!otevreno));
+    roz.lastChild.textContent = otevreno ? " Zobrazit záznam" : " Skrýt záznam";
+    return;
+  }
+  if (e.target.closest("[data-kopie]")) {
+    const url = location.href.split("#")[0] + "#poslanec/kovarova";
+    if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
+    oznam("Odkaz zkopírován.");
+    return;
+  }
+  if (e.target.closest("[data-namitka]")) {
+    oznam("Formulář námitky se otevře v ostré verzi.");
+  }
+});
+
+let casovac;
+function oznam(t) {
+  const el = document.getElementById("toast");
+  el.textContent = t;
+  el.classList.add("je-videt");
+  clearTimeout(casovac);
+  casovac = setTimeout(() => el.classList.remove("je-videt"), 2200);
+}
+
+document.getElementById("k-rejstriku").addEventListener("click", () => {
+  document.querySelector(".tabulka").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+/* přepínač motivu */
+const koren = document.documentElement;
+document.getElementById("prepinac").addEventListener("click", () => {
+  const tmave = matchMedia("(prefers-color-scheme: dark)").matches;
+  const ted = koren.dataset.theme || (tmave ? "dark" : "light");
+  koren.dataset.theme = ted === "dark" ? "light" : "dark";
+});
+
+/* ============ směrování ============ */
+
+const POHLEDY = ["rejstrik", "poslanec", "rozprava", "metodika"];
+
+function smeruj() {
+  const h = location.hash.replace("#", "") || "rejstrik";
+  const [jmeno, param] = h.split("/");
+  const cil = POHLEDY.includes(jmeno) ? jmeno : "rejstrik";
+
+  POHLEDY.forEach(v => {
+    document.getElementById("pohled-" + v).hidden = (v !== cil);
+  });
+  document.querySelectorAll("[data-nav]").forEach(a => {
+    const aktivni = a.dataset.nav === cil || (cil === "poslanec" && a.dataset.nav === "rejstrik");
+    if (aktivni) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
+
+  if (cil === "poslanec") { profilFiltr = "vse"; vykresliProfil(param); }
+  if (cil === "rozprava") vykresliRozpravu();
+  window.scrollTo(0, 0);
+}
+
+window.addEventListener("hashchange", smeruj);
+
+/* ============ start ============ */
+
+(function start() {
+  const m = document.getElementById("merid-pasmo");
+  pasmo(m, 100, [12, 31, 47, 68, 89], [23, 55, 81]);
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    [...m.children].forEach((d, i) => { d.style.animationDelay = (i * 6) + "ms"; });
+  }
+  vykresliRejstrik();
+  smeruj();
+})();
+</script>
