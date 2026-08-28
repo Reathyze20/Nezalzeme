@@ -1,5 +1,12 @@
 import "server-only";
-import { Debate } from "@/types/debate";
+import {
+  Debate,
+  HlasovaciBilance,
+  IndexVecnosti,
+  ProgramovaVernost,
+  RolovyObrat,
+  SlovoCin,
+} from "@/types/debate";
 import dataset from "./dataset.json";
 
 /**
@@ -29,6 +36,13 @@ export interface PspMeta {
   term: string;
   chamber: string;
   sittingDays: PspSittingDay[];
+  /**
+   * Kolik dnů CELÉHO volebního období má aspoň jedno jmenovité hlasování —
+   * z kompletního dumpu, nezávisle na tom, kolik dnů je v `sittingDays`
+   * (ty jsou jen ze staženého vzorku stenozáznamů). Jmenovatel pro "vzorek
+   * N z M" u Indexu věcnosti (Fáze 5). `null`, když se nedalo spočítat.
+   */
+  hlasovaniDnuCelkem: number | null;
   debateCount: number;
   messageCount: number;
   /**
@@ -55,6 +69,23 @@ export interface PspParty {
   color: string;
 }
 
+export interface HlidacHistoricalRole {
+  role: string;
+  organization: string;
+  since: string | null;
+  until: string | null;
+}
+
+export interface HlidacProfile {
+  osobaId: string;
+  profileUrl: string;
+  fullName: string;
+  birthYear?: number | null;
+  historicalRoles: HlidacHistoricalRole[];
+  corporateTiesCount: number;
+  corporateEntities: string[];
+}
+
 export interface PspPolitician {
   name: string;
   slug: string;
@@ -65,12 +96,44 @@ export interface PspPolitician {
   speechCount: number;
   lastSpokeAt: string;
   profileUrl: string;
+  hlidacStatu?: HlidacProfile;
+  /**
+   * Hlasovací bilance za volební období (Fáze 2). Chybí u členů vlády bez
+   * poslaneckého mandátu — ti v `poslanec.unl` nemají `id_poslanec`, takže
+   * pro ně jmenovité hlasování neexistuje.
+   */
+  hlasovaciBilance?: HlasovaciBilance;
+  /** Index věcnosti (Fáze 5) — poslanecké návrhy zákonů a rozklad vystoupení. */
+  indexVecnosti?: IndexVecnosti;
 }
 
 export const PSP_META = dataset.meta as PspMeta;
 export const PSP_PARTIES = dataset.parties as PspParty[];
 export const PSP_POLITICIANS = dataset.politicians as PspPolitician[];
 export const PSP_DEBATES = dataset.debates as Debate[];
+
+/**
+ * Slovo vs. Čin (Fáze 3) — jen položky, které prošly důkazní bránou
+ * v `export_web.verify_slovo_cin` (každá znovu odvozená z otevřených dat).
+ */
+export const PSP_SLOVO_CIN = ((dataset as { slovoCin?: unknown }).slovoCin ?? []) as SlovoCin[];
+
+/**
+ * Programová věrnost (Fáze 4) — jen položky, které prošly důkazní bránou
+ * v `export_web.verify_programova_vernost`.
+ */
+export const PSP_PROGRAMOVA_VERNOST = (
+  (dataset as { programovaVernost?: unknown }).programovaVernost ?? []
+) as ProgramovaVernost[];
+
+/**
+ * Rolový obrat v médiích (Fáze 6b) — jen položky, které prošly DVOJÍ bránou:
+ * strojovou (`export_web.verify_media_role_flip`) A ruční
+ * (`pipeline/promote_media_lead.py`, operátor si přečetl zdrojový článek).
+ */
+export const PSP_ROLOVY_OBRAT = (
+  (dataset as { rolovyObrat?: unknown }).rolovyObrat ?? []
+) as RolovyObrat[];
 
 /**
  * Analýza zatím neproběhla — engine nikdy neběžel nad žádným vystoupením.

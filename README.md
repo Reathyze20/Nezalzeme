@@ -34,6 +34,22 @@ pip install -r pipeline/requirements.txt
 npm install
 ```
 
+## Konfigurace API klíče (Google Gemini)
+
+Projekt je připraven na Google Gemini API jako výchozí backend:
+
+1. V kořeni projektu je připraven soubor `.env` (v `.gitignore`, necommituje se).
+2. Otevřete `.env` a vložte svůj API klíč:
+   ```env
+   GEMINI_API_KEY=vaš_api_klíč_zde
+   GEMINI_MODEL=gemini-2.5-flash
+   ```
+3. Alternativně lze klíč nastavit v terminálu:
+   ```powershell
+   $env:GEMINI_API_KEY="vaš_api_klíč_zde"
+   ```
+4. Pipeline automaticky detekuje přítomnost klíče (`--backend auto`).
+
 ## Pipeline — pořadí spuštění
 
 ### 1. Stažení dat
@@ -54,13 +70,33 @@ python pipeline/run_pipeline.py --faze claims
 python pipeline/run_pipeline.py --faze retrieval
 python pipeline/run_pipeline.py --faze nli
 python pipeline/run_pipeline.py --faze tribunal
+python pipeline/run_pipeline.py --faze slovocin
 python pipeline/run_pipeline.py --faze verify
+
+# Programová věrnost — nepotřebuje stenokorpus, běží nad celým obdobím
+# z otevřených dat; do "vse" nepatří, spouští se zvlášť.
+python pipeline/run_pipeline.py --faze programovavernost
 
 # Pokračovat tam, kde pipeline skončila (přeskočí hotové)
 python pipeline/run_pipeline.py --pokracovat
 
 # Backend bez API nákladů (prompty do JSONL fronty)
 python pipeline/run_pipeline.py --backend jsonl
+```
+
+### 2b. Novinářský nástroj (interní, ne veřejná značka)
+
+Sestaví podklad k prošetření z pásma NLI 0,50–0,80 (pod prahem tribunálu,
+tedy nikdy neprošlo ověřením) — vyžaduje, aby už proběhla fáze `nli`.
+Výstup je `pipeline/data/interni_prehled.json`, mimo `src/data/psp/`, čtený
+jen přes `/interni/prehled` zamčenou HTTP Basic Auth (`INTERNAL_TOOL_USER`/
+`INTERNAL_TOOL_PASSWORD` v `.env` — bez obou proměnných je route uzamčená
+napevno). Obohacení Hlídačem státu (`HLIDAC_STATU_TOKEN`) a Firecrawlem
+(`FIRECRAWL_API_KEY`) je volitelné, bez klíčů modul jen vynechá tu část.
+
+```bash
+python pipeline/journalist_tool.py
+python pipeline/journalist_tool.py --schuze 10
 ```
 
 ### 3. Export do webu
@@ -78,7 +114,7 @@ Vygeneruje `src/data/psp/dataset.json` — jediný vstup webové aplikace.
 python pipeline/validate.py
 
 # Ověření důkazů (proof.pastQuote musí ležet na proof.sourceUrl)
-python pipeline/verify_proof.py --input pipeline/data/hand_authored_examples.json
+python pipeline/verify_proof.py --input src/data/psp/dataset.json
 
 # Gold set — precision/recall deterministické vrstvy
 python pipeline/eval_gold.py

@@ -1,6 +1,10 @@
 """
 Forced alignment nad reálným zvukem PSP ČR (Fáze 7, WhisperX-style).
 
+[EXPERIMENTÁLNÍ VÝZKUMNÝ MODUL — NENÍ ZAPOJEN DO PRODUKČNÍ PIPELINE]
+Podmínka produkčního nasazení: ručně verifikovaný gold set ~20 časových kotev.
+V produkci se používá deterministický aligner.py (OFFSET_SYNC / orientační čas).
+
 `pipeline/aligner.align_message()` už cestu FORCED_ALIGNMENT plně
 modeluje — přijímá `{id_anotace: přesná_vteřina}` a promítne ji do
 `mediaEvidence`. Tenhle modul je to, co ten slovník skutečně vyrobí:

@@ -10,11 +10,14 @@
  * dostaly i anotace, které důkazní břemeno neunesly.
  */
 
-import { Annotation, Debate, Message } from "@/types/debate";
+import { Annotation, Debate, Message, ProgramovaVernost, RolovyObrat, SlovoCin } from "@/types/debate";
 import {
   ANALYSIS_PENDING,
   PSP_DEBATES,
   PSP_META,
+  PSP_PROGRAMOVA_VERNOST,
+  PSP_ROLOVY_OBRAT,
+  PSP_SLOVO_CIN,
   PSP_PARTIES,
   PSP_POLITICIANS,
 } from "@/data/psp";
@@ -94,6 +97,8 @@ export const ANALYZA = {
   vystoupeniCelkem: PSP_META.messageCount,
   rozpravCelkem: PSP_META.debateCount,
   jednaciDny: PSP_META.sittingDays.length,
+  /** Dnů s hlasováním za celé volební období — jmenovatel pro Index věcnosti. */
+  hlasovaniDnuCelkem: PSP_META.hlasovaniDnuCelkem,
   zdroj: PSP_META.source,
   obdobi: PSP_META.term,
   aktualizovano: PSP_META.generatedAt,
@@ -176,3 +181,31 @@ export const POLITICIANS_WITH_COUNTS = PSP_POLITICIANS.map((politik) => ({
     0
   ),
 })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "cs"));
+
+
+/**
+ * Doklady „řečeno vs. hlasováno" (Fáze 3) pro jednu rozpravu.
+ *
+ * Čte se z `PSP_SLOVO_CIN`, kam se dostane jen to, co prošlo důkazní bránou
+ * v `export_web.verify_slovo_cin`.
+ */
+export function slovoCinProRozpravu(debateId: string): SlovoCin[] {
+  return PSP_SLOVO_CIN.filter((z) => z.receno.debateId === debateId);
+}
+
+/**
+ * Programová věrnost (Fáze 4) — jen položky, které prošly důkazní bránou
+ * v `export_web.verify_programova_vernost`, v pořadí kapitol prohlášení.
+ */
+export const PROGRAMOVA_VERNOST: ProgramovaVernost[] = [...PSP_PROGRAMOVA_VERNOST].sort(
+  (a, b) => a.zavazek.kapitolaPoradi - b.zavazek.kapitolaPoradi
+);
+
+/**
+ * Rolový obrat v médiích (Fáze 6b) — jediná veřejná funkce se zdrojem mimo
+ * stenozáznam, proto jediná s ručním schválením před publikací
+ * (`pipeline/promote_media_lead.py`). Řazeno od nejnověji schválených.
+ */
+export const ROLOVY_OBRAT: RolovyObrat[] = [...PSP_ROLOVY_OBRAT].sort(
+  (a, b) => (a.schvalenoAt < b.schvalenoAt ? 1 : -1)
+);

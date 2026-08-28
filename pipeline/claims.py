@@ -28,6 +28,19 @@ from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+try:
+    import dotenv
+    _root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _env_file = os.path.join(_root_dir, ".env")
+    if os.path.exists(_env_file):
+        dotenv.load_dotenv(_env_file)
+    else:
+        dotenv.load_dotenv()
+except Exception:
+    pass
+
+from model_backend import clean_json_markdown  # noqa: E402
+
 from detector import CLAIM_CATEGORIES, SPEECH_ACTS, nearest_occurrence  # noqa: E402
 
 REQUIRED_CLAIM_KEYS = (
@@ -88,12 +101,28 @@ def build_claim_extraction_prompt(message: Dict[str, Any]) -> str:
 
 def call_claim_extraction_model(payload: str, model: str = CLAIM_EXTRACTION_MODEL) -> str:
     """
-    Jediné místo v modulu, které skutečně volá LLM.
-
-    Import `anthropic` je schválně uvnitř funkce: čisté funkce
-    (`build_claim_extraction_prompt`, `parse_claims_response`) tak jdou
-    testovat i v prostředí bez nainstalovaného SDK.
+    Jediné místo v modulu, které skutečně volá LLM (pokud není použit model_backend.py).
+    Automaticky vybere Gemini nebo Anthropic podle přítomných API klíčů.
     """
+    gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if gemini_key:
+        from google import genai
+        from google.genai import types
+
+        gemini_model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+        client = genai.Client(api_key=gemini_key)
+        response = client.models.generate_content(
+            model=gemini_model,
+            contents=payload,
+            config=types.GenerateContentConfig(
+                system_instruction=CLAIM_EXTRACTION_PROMPT,
+                response_mime_type="application/json",
+                temperature=0.0,
+                max_output_tokens=4096,
+            ),
+        )
+        return clean_json_markdown(response.text or "")
+
     import anthropic
 
     client = anthropic.Anthropic()
@@ -103,7 +132,9 @@ def call_claim_extraction_model(payload: str, model: str = CLAIM_EXTRACTION_MODE
         system=CLAIM_EXTRACTION_PROMPT,
         messages=[{"role": "user", "content": payload}],
     )
-    return "".join(block.text for block in response.content if block.type == "text")
+    return clean_json_markdown(
+        "".join(block.text for block in response.content if block.type == "text")
+    )
 
 
 def _validate_raw_claim(raw: Dict[str, Any]) -> Optional[List[str]]:
@@ -126,8 +157,9 @@ def parse_claims_response(raw_json: str, message: Dict[str, Any]) -> List[Dict[s
     speaker_id = message.get("source", {}).get("idOsoba", "")
     message_id = message.get("messageId", "")
 
+    cleaned_json = clean_json_markdown(raw_json)
     try:
-        raw_claims = json.loads(raw_json)
+        raw_claims = json.loads(cleaned_json)
     except json.JSONDecodeError as err:
         print("[-] {}: model nevrátil validní JSON ({})".format(message_id, err))
         return []

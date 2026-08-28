@@ -101,6 +101,7 @@ def build_signals_from_pipeline(
     tribunal_passed: Optional[bool] = None,
     arbiter_confidence: Optional[float] = None,
     vote_fact_confirmed: Optional[bool] = None,
+    vote_is_procedural: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """
     Pomocná funkce pro `run_pipeline.py` — složí signály z výstupů
@@ -120,13 +121,145 @@ def build_signals_from_pipeline(
     if arbiter_confidence is not None:
         signals["model_self_assessment"] = arbiter_confidence
 
-    if vote_fact_confirmed is not None:
+    if vote_is_procedural:
+        # Procedurální hlasování (odročení, pořad) nemůže být penalizováno jako věcný rozpor
+        signals["vote_hard_fact"] = 0.0
+    elif vote_fact_confirmed is not None:
         signals["vote_hard_fact"] = 1.0 if vote_fact_confirmed else 0.0
 
     return signals
 
 
+
+# ---------------------------------------------------------------------------
+# Index konzistence poslance (Stance Consistency Index — SCI)
+# ---------------------------------------------------------------------------
+
+def compute_sci(
+    total_commitments: int,
+    contradiction_scores: list,
+    threshold: float = 0.80,
+) -> float:
+    """
+    Spočítá Index konzistence poslance (SCI_p) — míru názorové stálosti v čase.
+
+    Vzorec:
+        SCI_p = 1.0 - (1/N) * Σ w(c_i) * I(Score(c_i) >= threshold)
+
+    Kde:
+      - `total_commitments` (N): celkový počet atomických výroků typu
+        STANCE_COMMITMENT daného poslance ze `claims` tabulky.
+      - `contradiction_scores`: list kompozitních skóre (float 0–1) pro páry,
+        které model označil jako rozpory (jsou to finální composite scores
+        z `verdicts` tabulky, typ CONTEXT_DEVELOPMENT + PUBLISHED).
+      - `threshold`: hranice, od které uvažujeme rozpor za „podstatný"
+        (výchozí 0.80 = shodné s CONTEXT_DEVELOPMENT/PUBLISHED pásmem).
+
+    Váha w(c_i) je rovna `Score(c_i)` samotné — silnější rozpor váží více.
+
+    Returns:
+        float 0–1, kde 1.0 = absolutní konzistence, 0.0 = maximální nestálost.
+        Vrátí 1.0 pro poslance s 0 závazkovými výroky (žádná data).
+    """
+    if not total_commitments or total_commitments <= 0:
+        return 1.0
+
+    weighted_sum = sum(
+        score for score in contradiction_scores if score >= threshold
+    )
+    # Normalizace váženým součtem dělená počtem závazků, ne počtem sporů.
+    raw = weighted_sum / total_commitments
+    return round(_clamp(1.0 - raw), 4)
+
+
+def sci_label(sci: float) -> str:
+    """Vrátí lidsky čitelný popis SCI skóre pro zobrazení na profilu poslance."""
+    if sci >= 0.95:
+        return "Vysoká konzistence"
+    if sci >= 0.85:
+        return "Mírně proměnlivé postoje"
+    if sci >= 0.70:
+        return "Znatelné obraty v čase"
+    return "Výrazná nestálost postojů"
+
+
+# ---------------------------------------------------------------------------
+# Atribuční analýza obratu (Causal Flip Attribution)
+# ---------------------------------------------------------------------------
+
+# Čtyři diskrétní třídy příčiny obratu — viz popis v metodice.
+FLIP_EXTERNAL_SHOCK = "EXTERNAL_SHOCK"
+FLIP_COALITION_COMPROMISE = "COALITION_COMPROMISE"
+FLIP_PROCEDURAL_EVASION = "PROCEDURAL_EVASION"
+FLIP_OPPORTUNISTIC = "OPPORTUNISTIC_FLIP"
+
+
+def compute_flip_attribution(
+    arbiter_rationale: str,
+    defense_evaluated: str,
+    is_vote_mismatch: bool = False,
+    macro_context_available: bool = False,
+    macro_shock_confirmed: bool = False,
+    composite_score: float = 0.0,
+    defense_passed: bool = True,
+) -> str:
+    """
+    Klasifikuje příčinu postav obratu do 4 diskrétních tříd.
+
+    Pracuje na textovém výstupu Tribunálu — jednoduché klíčové fráze
+    jsou lepší než přetěžování LLM dalším promptem.
+
+    Pravidla (v pořadí priority):
+      1. EXTERNAL_SHOCK — obhajoba odkazuje na vnější ekonomický nebo
+         bezpečnostní šok a `macro_context_available` ho potvrzuje.
+      2. COALITION_COMPROMISE — obhajoba odkazuje na koaliční vyjednávání
+         (klíčová slova v rationale/defense text).
+      3. PROCEDURAL_EVASION — jde o hlasování o procedurálním bodě
+         (is_vote_mismatch + procedurální kontext) nebo je composite_score
+         jen těsně nad prahem (< 0.82) se slabou Žalobcovou pozicí.
+      4. OPPORTUNISTIC_FLIP — default; defense neobstála (defense_passed=True,
+         tj. Soudce zamítl obhajobu) a jiná třída nebyla potvrzena.
+
+    Returns:
+        Jedna ze čtyř konstant FLIP_*.
+    """
+    rationale_lower = (arbiter_rationale or "").lower()
+    defense_lower = (defense_evaluated or "").lower()
+    combined = rationale_lower + " " + defense_lower
+
+    # 1. Vnější šok (potvrzený makrodaty nebo explicitně zmíněný)
+    external_keywords = [
+        "inflac", "inflač", "recese", "hospodářsk", "ekonomick", "pandemie", "covid",
+        "válk", "war", "energetick", "krize", "shock", "šok", "exogenní", "vnější šok",
+        "úrokové sazby", "repo sazba", "cnb", "čnb",
+    ]
+    if any(kw in combined for kw in external_keywords):
+        if macro_shock_confirmed or macro_context_available:
+            return FLIP_EXTERNAL_SHOCK
+
+    # 2. Koaliční kompromis
+    coalition_keywords = [
+        "koalic", "kompromis", "partner", "dohod", "vyjednáv", "pozměňovac",
+        "koaliční smlouv", "vládní partner",
+    ]
+    if any(kw in combined for kw in coalition_keywords):
+        return FLIP_COALITION_COMPROMISE
+
+    # 3. Procedurální vyhýbání (slabé skóre nebo procedurální hlasování)
+    if is_vote_mismatch and composite_score < 0.82:
+        return FLIP_PROCEDURAL_EVASION
+    procedural_keywords = [
+        "odroč", "přerušen", "technick", "formáln", "procedur",
+    ]
+    if any(kw in combined for kw in procedural_keywords):
+        return FLIP_PROCEDURAL_EVASION
+
+    # 4. Výchozí: čistá oportunistická otočka
+    return FLIP_OPPORTUNISTIC
+
+
 if __name__ == "__main__":
+
     # Self-test: typické hodnoty pro různé scénáře
     print("=== Kompozitní skóre — self-test ===")
 

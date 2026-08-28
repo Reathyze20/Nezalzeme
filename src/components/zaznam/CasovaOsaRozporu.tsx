@@ -4,6 +4,7 @@ import { Clock, Calendar, ArrowRight, CheckCircle2, AlertTriangle, ExternalLink 
 import { PoslanecZaznam } from "@/lib/poslanci";
 import { formatDatum, getKategorieMeta } from "@/lib/ui";
 import { cn } from "@/lib/utils";
+import { VideoEvidence } from "@/components/media/VideoEvidence";
 
 interface CasovaOsaRozporuProps {
   zaznamy: PoslanecZaznam[];
@@ -88,6 +89,12 @@ export function CasovaOsaRozporu({ zaznamy, jmeno, className }: CasovaOsaRozporu
                 <p className="font-serif font-serif-text text-[13.5px] leading-[1.5] text-inkoust-2 mt-3 pt-2.5 border-t border-linka-2">
                   {z.vysvetleni}
                 </p>
+
+                {z.media && (
+                  <div className="mt-4 max-w-md">
+                    <VideoEvidence evidence={z.media} label="Záznam vystoupení" />
+                  </div>
+                )}
 
                 <div className="mt-3 flex items-center justify-between flex-wrap gap-2 pt-1">
                   <a

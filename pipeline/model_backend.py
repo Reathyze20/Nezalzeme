@@ -1,14 +1,17 @@
 """
-Pluggable model backend — jedno rozhraní pro volání LLM, dvě implementace.
+Pluggable model backend — jedno rozhraní pro volání LLM, tři implementace.
 
-    ApiBackend   — volá Anthropic API přímo; výsledky ukládá do LLM cache
-                   v engine.sqlite, aby se opakovaný experiment neplatil.
-    JsonlBackend — nulové náklady pro pilot: zapíše prompty do fronty (JSONL),
-                   uživatel je zpracuje v Claude Code a odpovědi zapíše zpátky.
+    GeminiBackend — volá Google Gemini API (gemini-2.5-flash); výsledky
+                    ukládá do LLM cache v engine.sqlite.
+    ApiBackend    — volá Anthropic API přímo; výsledky ukládá do LLM cache.
+    JsonlBackend  — nulové náklady pro pilot: zapíše prompty do fronty (JSONL),
+                    uživatel je zpracuje v Claude Code a odpovědi zapíše zpátky.
 
-Přidání Gemini nebo jiného providera = podtřída `ApiBackend` s jiným SDK.
+Použití (Gemini — výchozí):
+    backend = GeminiBackend(conn)
+    text = backend.call("CLAIMS", SYSTEM_PROMPT, payload, "gemini-2.5-flash")
 
-Použití (api):
+Použití (Anthropic):
     backend = ApiBackend(conn)
     text = backend.call("CLAIMS", SYSTEM_PROMPT, payload, "claude-sonnet-5")
 
@@ -18,16 +21,48 @@ Použití (jsonl — pilot za nulové náklady):
         run_pipeline(backend, ...)
     except PendingCallsError as e:
         print("Zpracuj frontu v Claude Code:", e.queue_path)
-    # Po zpracování: zapsat odpovědi do llm_responses.jsonl, spustit znovu.
 """
 
 import io
 import json
 import os
 import sqlite3
+import warnings
 from typing import Any, Dict, List, Optional
 
+warnings.filterwarnings("ignore", message=".*automatic function calling.*")
+
+# Načtení .env souboru (kořen projektu nebo cwd)
+try:
+    import dotenv
+
+    _root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _env_file = os.path.join(_root_dir, ".env")
+    if os.path.exists(_env_file):
+        dotenv.load_dotenv(_env_file)
+    else:
+        dotenv.load_dotenv()
+except Exception:
+    pass
+
 from db import cache_key as _make_cache_key, now_iso
+
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
+DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5"
+
+
+def clean_json_markdown(text: str) -> str:
+    """Odstraní markdown obal ```json ... ``` pokud jej model vrátil."""
+    s = text.strip()
+    if s.startswith("```"):
+        lines = s.split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        return "\n".join(lines).strip()
+    return s
+
 
 # ---------------------------------------------------------------------------
 # Výjimky
@@ -53,6 +88,10 @@ class _PendingCall(Exception):
 # ---------------------------------------------------------------------------
 
 class ModelBackend:
+    def effective_model(self, model: str) -> str:
+        """Vrátí konkrétní název modelu, který backend skutečně použije."""
+        return model
+
     def call(
         self,
         role: str,
@@ -75,21 +114,61 @@ class ModelBackend:
 
 
 # ---------------------------------------------------------------------------
-# API backend (Anthropic)
+# Google Gemini backend
 # ---------------------------------------------------------------------------
 
-class ApiBackend(ModelBackend):
+class GeminiBackend(ModelBackend):
     """
-    Volá Anthropic API. Výsledky ukládá do llm_cache v engine.sqlite —
-    druhý běh nad stejnými daty nic nestojí.
+    Volá Google Gemini API přes nový oficiální SDK `google-genai`.
+    Výsledky ukládá do llm_cache v engine.sqlite — druhý běh nad stejnými
+    daty nic nestojí.
 
-    Vyžaduje ANTHROPIC_API_KEY v prostředí.
+    Vyžaduje GEMINI_API_KEY nebo GOOGLE_API_KEY v prostředí nebo v souboru .env.
     """
 
-    def __init__(self, conn: sqlite3.Connection) -> None:
+    def __init__(
+        self,
+        conn: sqlite3.Connection,
+        default_model: Optional[str] = None,
+        api_key: Optional[str] = None,
+    ) -> None:
         self.conn = conn
+        self.api_key = (
+            api_key
+            or os.environ.get("GEMINI_API_KEY")
+            or os.environ.get("GOOGLE_API_KEY")
+        )
+        self.default_model = (
+            default_model
+            or os.environ.get("GEMINI_MODEL")
+            or DEFAULT_GEMINI_MODEL
+        )
         self._hits = 0
         self._misses = 0
+        self._client = None
+
+    def effective_model(self, model: str) -> str:
+        # Pokud je předán výchozí model Anthropic (claude-sonnet-5) nebo prázdný,
+        # automaticky mapujeme na nastavený Gemini model.
+        if not model or model.startswith("claude") or model == "default":
+            return self.default_model
+        return model
+
+    def _get_client(self):
+        if self._client is not None:
+            return self._client
+        if not self.api_key:
+            raise ValueError(
+                "Nenalezena proměnná prostředí GEMINI_API_KEY ani GOOGLE_API_KEY.\n"
+                "Vložte svůj API klíč do souboru .env v kořeni projektu:\n"
+                "  GEMINI_API_KEY=vaš_klíč_zde\n"
+                "Nebo vložte klíč přímo do PowerShellu před spuštěním:\n"
+                "  $env:GEMINI_API_KEY=\"vaš_klíč_zde\""
+            )
+        from google import genai
+
+        self._client = genai.Client(api_key=self.api_key)
+        return self._client
 
     def _from_cache(self, ck: str) -> Optional[str]:
         row = self.conn.execute(
@@ -116,27 +195,119 @@ class ApiBackend(ModelBackend):
         model: str,
         ck: Optional[str] = None,
     ) -> str:
+        actual_model = self.effective_model(model)
         if ck is None:
-            ck = _make_cache_key(model, user_payload)
+            ck = _make_cache_key(actual_model, user_payload)
 
         cached = self._from_cache(ck)
         if cached is not None:
             return cached
 
+        client = self._get_client()
+        from google.genai import types
+
+        thinking_cfg = None
+        if "3.7" in actual_model or "2.5" in actual_model:
+            try:
+                thinking_cfg = types.ThinkingConfig(thinking_budget=0)
+            except Exception:
+                thinking_cfg = None
+
+        config = types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            temperature=0.0,
+            max_output_tokens=4096,
+            thinking_config=thinking_cfg,
+        )
+
+        response = client.models.generate_content(
+            model=actual_model,
+            contents=user_payload,
+            config=config,
+        )
+        text = clean_json_markdown(response.text or "")
+        self._misses += 1
+        self._to_cache(ck, text, actual_model)
+        return text
+
+    def stats(self) -> Dict[str, int]:
+        return {"cache_hits": self._hits, "api_calls": self._misses}
+
+
+# ---------------------------------------------------------------------------
+# API backend (Anthropic)
+# ---------------------------------------------------------------------------
+
+class ApiBackend(ModelBackend):
+    """
+    Volá Anthropic API. Výsledky ukládá do llm_cache v engine.sqlite —
+    druhý běh nad stejnými daty nic nestojí.
+
+    Vyžaduje ANTHROPIC_API_KEY v prostředí nebo v souboru .env.
+    """
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self.conn = conn
+        self._hits = 0
+        self._misses = 0
+
+    def effective_model(self, model: str) -> str:
+        return model or DEFAULT_ANTHROPIC_MODEL
+
+    def _from_cache(self, ck: str) -> Optional[str]:
+        row = self.conn.execute(
+            "SELECT response_text FROM llm_cache WHERE cache_key = ?", (ck,)
+        ).fetchone()
+        if row:
+            self._hits += 1
+            return row["response_text"]
+        return None
+
+    def _to_cache(self, ck: str, text: str, model: str) -> None:
+        self.conn.execute(
+            "INSERT OR REPLACE INTO llm_cache "
+            "(cache_key, response_text, model_name, cached_at) VALUES (?, ?, ?, ?)",
+            (ck, text, model, now_iso()),
+        )
+        self.conn.commit()
+
+    def call(
+        self,
+        role: str,
+        system_prompt: str,
+        user_payload: str,
+        model: str,
+        ck: Optional[str] = None,
+    ) -> str:
+        actual_model = self.effective_model(model)
+        if ck is None:
+            ck = _make_cache_key(actual_model, user_payload)
+
+        cached = self._from_cache(ck)
+        if cached is not None:
+            return cached
+
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise ValueError(
+                "Nenalezena proměnná prostředí ANTHROPIC_API_KEY.\n"
+                "Vložte klíč do .env nebo použijte Google Gemini s GEMINI_API_KEY."
+            )
+
         import anthropic
 
         client = anthropic.Anthropic()
         response = client.messages.create(
-            model=model,
+            model=actual_model,
             max_tokens=4096,
             system=system_prompt,
             messages=[{"role": "user", "content": user_payload}],
         )
-        text = "".join(
-            block.text for block in response.content if block.type == "text"
+        text = clean_json_markdown(
+            "".join(block.text for block in response.content if block.type == "text")
         )
         self._misses += 1
-        self._to_cache(ck, text, model)
+        self._to_cache(ck, text, actual_model)
         return text
 
     def stats(self) -> Dict[str, int]:
@@ -158,22 +329,7 @@ RESPONSES_PATH = os.path.join(
 class JsonlBackend(ModelBackend):
     """
     Pilot za nulové náklady — pipeline zapisuje prompty do fronty,
-    uživatel je zpracuje v Claude Code.
-
-    Průběh:
-    1. `run_pipeline.py --backend jsonl` → backend narazí na chybějící
-       odpovědi, uloží llm_queue.jsonl a vyvolá PendingCallsError.
-    2. Uživatel v Claude Code přečte každý řádek fronty, zavolá model
-       a zapíše odpovědi do llm_responses.jsonl (jeden JSON objekt na řádek).
-    3. `run_pipeline.py --backend jsonl --pokracovat` → backend načte
-       odpovědi, uloží do llm_cache, pipeline pokračuje.
-
-    Formát řádku v llm_queue.jsonl:
-        {"cache_key":"…","role":"CLAIMS","model":"claude-sonnet-5",
-         "system":"…","user":"…"}
-
-    Formát řádku v llm_responses.jsonl:
-        {"cache_key":"…","response_text":"…"}
+    uživatel je zpracuje v Claude Code nebo jiném nástroji.
     """
 
     def __init__(
@@ -202,7 +358,7 @@ class JsonlBackend(ModelBackend):
                     ck = item.get("cache_key")
                     text = item.get("response_text")
                     if ck and text is not None:
-                        responses[ck] = text
+                        responses[ck] = clean_json_markdown(text)
                 except json.JSONDecodeError:
                     continue
         if responses:

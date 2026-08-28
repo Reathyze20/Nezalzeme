@@ -1,6 +1,6 @@
 import { DEBATES, jeZkontrolovano } from "@/lib/debate";
-import { PSP_POLITICIANS } from "@/data/psp";
-import { AnomalyType, GovTrackScore, MediaEvidence, PresentationTier, SeverityLevel } from "@/types/debate";
+import { PSP_POLITICIANS, PSP_SLOVO_CIN, HlidacProfile } from "@/data/psp";
+import { AnomalyType, GovTrackScore, HlasovaciBilance, IndexVecnosti, MediaEvidence, PresentationTier, SeverityLevel, SlovoCin } from "@/types/debate";
 import { formatDatum } from "@/lib/ui";
 import { resolveMediaEvidence } from "@/lib/media";
 
@@ -54,6 +54,14 @@ export interface PoslanecZaznam {
   defenseEvaluated?: string;
   /** Fáze 4: vlastní zdůvodnění role Soudce, odlišné od `defenseEvaluated` (shrnutí Obhájce). */
   arbiterRationale?: string;
+  votingBallotId?: string;
+  voteRecorded?: string;
+  debateTisk?: {
+    cisloTisku: string | null;
+    faze: string;
+    nazev: string;
+    url: string;
+  };
 }
 
 export interface PoslanecSouhrn {
@@ -72,11 +80,26 @@ export interface PoslanecSouhrn {
   tally: StavVystoupeni[];
   /** Odkaz na profil na psp.cz. */
   profilUrl: string;
+  hlidacStatu?: HlidacProfile;
+  stanceConsistency?: {
+    sci: number;
+    sciLabel: string;
+    contradictionCount: number;
+    commitmentCount: number;
+    partyAverageSci?: number;
+    sciVsPartyDelta?: number;
+  };
+  /** Hlasovací bilance za volební období (Fáze 2) — z otevřených dat PSP ČR. */
+  hlasovaciBilance?: HlasovaciBilance;
+  /** Index věcnosti (Fáze 5) — poslanecké návrhy zákonů a rozklad vystoupení. */
+  indexVecnosti?: IndexVecnosti;
 }
 
 export interface PoslanecDetail extends PoslanecSouhrn {
   zaznamy: PoslanecZaznam[];
   govTrackScore?: GovTrackScore;
+  /** Doklady „řečeno vs. hlasováno" (Fáze 3) pro tohoto poslance. */
+  slovoCin: SlovoCin[];
 }
 
 interface VystoupeniZaznam {
@@ -146,6 +169,9 @@ function sestavDetaily(): Map<string, PoslanecDetail> {
           defensesConsidered: ann.adversarialCheck?.defensesConsidered,
           defenseEvaluated: ann.adversarialCheck?.defenseEvaluated,
           arbiterRationale: ann.adversarialCheck?.arbiterRationale,
+          votingBallotId: ann.proof?.votingBallotId,
+          voteRecorded: ann.proof?.voteRecorded,
+          debateTisk: (debate as any).tisk,
         });
       }
     }
@@ -172,6 +198,11 @@ function sestavDetaily(): Map<string, PoslanecDetail> {
       tally,
       zaznamy,
       govTrackScore,
+      hlidacStatu: p.hlidacStatu,
+      stanceConsistency: (p as any).stanceConsistency,
+      hlasovaciBilance: p.hlasovaciBilance,
+      indexVecnosti: p.indexVecnosti,
+      slovoCin: PSP_SLOVO_CIN.filter((z) => z.idOsoba === String(p.idOsoba)),
     });
   }
 
@@ -180,7 +211,7 @@ function sestavDetaily(): Map<string, PoslanecDetail> {
 
 export function getVsichniPoslanci(): PoslanecSouhrn[] {
   return [...sestavDetaily().values()]
-    .map(({ zaznamy, govTrackScore, ...souhrn }) => souhrn)
+    .map(({ zaznamy, govTrackScore, slovoCin, ...souhrn }) => souhrn)
     .sort((a, b) => prijmeniZ(a.jmeno).localeCompare(prijmeniZ(b.jmeno), "cs"));
 }
 

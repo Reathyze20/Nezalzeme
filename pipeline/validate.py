@@ -1,15 +1,16 @@
 """
-Regresní kontrola ukázkové fixtury proti schématu enginu v2.
+Regresní kontrola skutečného korpusu proti schématu enginu v2.
 
-Nahrazuje dřívější skripty `fix_indices.py`, `verify_indices.py` a `verify_all.py`
-v kořeni repozitáře. Ty držely vlastní kopii datasetu a musely se udržovat ručně;
-tady se dataset načítá z jednoho místa a kontroluje celým řetězcem pipeline:
+Přesměrováno z ukázkové fixtury na skutečný korpus (`pipeline/data/psp/*.json`),
+aby pojistka mohla spadnout tam, kde na tom záleží — na skutečných datech.
 
     normalize_annotation  ->  apply_confidence_gate  ->  validate_extracted_debate
 
 Spuštění:  python pipeline/validate.py
 """
 
+import glob
+import io
 import json
 import os
 import sys
@@ -17,21 +18,46 @@ import sys
 from detector import (
     CONTEXT_THRESHOLD,
     PUBLISH_THRESHOLD,
+    VOTE_VALUES,
     apply_confidence_gate,
     normalize_annotation,
     validate_extracted_debate,
 )
 
-FIXTURE = os.path.join(os.path.dirname(__file__), "data", "sample_debates.json")
+PIPELINE_DIR = os.path.dirname(os.path.abspath(__file__))
+CORPUS_DIR = os.path.join(PIPELINE_DIR, "data", "psp")
+FIXTURE_FALLBACK = os.path.join(PIPELINE_DIR, "data", "sample_debates.json")
 
 # Fáze 0 pojistka: pokud analyzedMessageCount == messageCount ale počet
 # anotací je pod tímhle podílem z celku, pipeline lže o stavu analýzy.
 _ANALYZED_ANNOTATION_RATIO_MIN = 0.01  # alespoň 1 anotace na 100 vystoupení
 
 
+def load_debates():
+    """Načte skutečný korpus; padá-li zpět na fixturu, varuje."""
+    corpus_files = sorted(glob.glob(os.path.join(CORPUS_DIR, "*.json")))
+    debates = []
+
+    if corpus_files:
+        for fpath in corpus_files:
+            with io.open(fpath, encoding="utf-8") as handle:
+                debates.extend(json.load(handle))
+        print("Načteno {} rozprav ze skutečného korpusu ({} souborů).".format(
+            len(debates), len(corpus_files)))
+    elif os.path.exists(FIXTURE_FALLBACK):
+        print("VAROVÁNÍ: skutečný korpus nenalezen v {}, padám zpět na fixturu.".format(CORPUS_DIR))
+        with io.open(FIXTURE_FALLBACK, encoding="utf-8") as handle:
+            debates = json.load(handle)
+    else:
+        print("CHYBA: žádná data v {} ani {}.".format(CORPUS_DIR, FIXTURE_FALLBACK))
+
+    return debates
+
+
 def main() -> int:
-    with open(FIXTURE, "r", encoding="utf-8") as handle:
-        debates = json.load(handle)
+    debates = load_debates()
+    if not debates:
+        return 1
 
     problems = []
     published_total = 0
@@ -42,9 +68,8 @@ def main() -> int:
         for message in debate["messages"]:
             clean_text = message["cleanText"]
 
-            # Znakové indexy musí sedět ještě před normalizací — kontrola,
-            # kterou dřív dělal verify_all.py.
-            for ann in message["annotations"]:
+            # Znakové indexy musí sedět ještě před normalizací
+            for ann in message.get("annotations", []):
                 actual = clean_text[ann["start"]:ann["end"]]
                 if actual != ann["targetSnippet"]:
                     problems.append(
@@ -54,22 +79,36 @@ def main() -> int:
                         )
                     )
 
-            normalized = [normalize_annotation(a, clean_text) for a in message["annotations"]]
-            usable = [a for a in normalized if a]
-            if len(usable) != len(message["annotations"]):
-                problems.append(
-                    "{}: {} anotací neprošlo normalizací".format(
-                        message["messageId"], len(message["annotations"]) - len(usable)
+            # Kontrola source.ballots — voteOfSpeaker musí být platná hodnota
+            ballots = (message.get("source") or {}).get("ballots", [])
+            for ballot in ballots:
+                vote = ballot.get("voteOfSpeaker")
+                if vote is not None and vote not in VOTE_VALUES:
+                    problems.append(
+                        "{}: neplatná voteOfSpeaker {!r} v ballot {}".format(
+                            message["messageId"], vote, ballot.get("ballotId", "?"),
+                        )
                     )
-                )
 
-            published, context_development, dropped = apply_confidence_gate(usable)
-            published_total += len(published)
-            context_total += len(context_development)
-            dropped_total += len(dropped)
+            # Normalizace a confidence gate (pokud jsou anotace)
+            annotations = message.get("annotations", [])
+            if annotations:
+                normalized = [normalize_annotation(a, clean_text) for a in annotations]
+                usable = [a for a in normalized if a]
+                if len(usable) != len(annotations):
+                    problems.append(
+                        "{}: {} anotací neprošlo normalizací".format(
+                            message["messageId"], len(annotations) - len(usable)
+                        )
+                    )
 
-            message["annotations"] = published + context_development
-            message["hasAnomalies"] = bool(message["annotations"])
+                published, context_development, dropped = apply_confidence_gate(usable)
+                published_total += len(published)
+                context_total += len(context_development)
+                dropped_total += len(dropped)
+
+                message["annotations"] = published + context_development
+                message["hasAnomalies"] = bool(message["annotations"])
 
         ok, errors = validate_extracted_debate(debate)
         if not ok:
@@ -81,13 +120,13 @@ def main() -> int:
 
     if problems:
         print("\nNALEZENÉ PROBLÉMY:")
-        for problem in problems:
+        for problem in problems[:20]:
             print("  - {}".format(problem))
+        if len(problems) > 20:
+            print("  ... a dalších {}".format(len(problems) - 20))
         return 1
 
-    # Fáze 0 regresní pojistka: analyzedAt smí mít jen vystoupení se skutečným
-    # nálezem. Pokud jsou analyzedAt == messageCount ale anotací je hrstka,
-    # pipeline opět razítkuje bezpodmínečně.
+    # Fáze 0 regresní pojistka
     total_messages = sum(len(d["messages"]) for d in debates)
     analyzed_messages = sum(
         1 for d in debates for m in d["messages"] if m.get("analyzedAt")
@@ -110,9 +149,7 @@ def main() -> int:
 
     print(
         "schéma i znakové indexy v pořádku "
-        "(fixtura je výřez datasetu: {} rozprav, {} vystoupení)".format(
-            len(debates), total_messages
-        )
+        "({} rozprav, {} vystoupení)".format(len(debates), total_messages)
     )
     return 0
 

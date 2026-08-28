@@ -34,6 +34,23 @@ __pycache__/
 # Pipeline raw/reproducible caches (fetched from PSP API, regeneratable)
 pipeline/data/psp_cache/
 pipeline/data/audio_cache/
+pipeline/data/engine.sqlite
+pipeline/data/hlidac_cache.sqlite
+pipeline/data/hlidac_profiles.json
+pipeline/data/firecrawl_cache.sqlite
+pipeline/data/transcriptapi_cache.sqlite
+
+# Interní novinářský nástroj (Fáze 6) — nikdy commitovat: neověřené leady
+# pod skutečnými jmény, patří jen za /interni/prehled (HTTP Basic Auth).
+pipeline/data/interni_prehled.json
 
 # gstack local tool logs (browse skill session state)
 .gstack/
+pipeline/data/vlada_cache/
+pipeline/data/engine.sqlite.bak
+
+# Scratch/debug scripts, not part of the app
+scratch/
+
+# Claude Code runtime lock state
+.claude/scheduled_tasks.lock
