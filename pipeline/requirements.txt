@@ -1,4 +1,6 @@
-# Fáze 2b: SDK pro volání LLM při extrakci Claim (pipeline/claims.py).
+# Volání LLM (Google Gemini nebo Anthropic Claude).
+google-genai>=0.1.0
+python-dotenv>=1.0.0
 anthropic>=0.40
 
 # Fáze 3: lokální bi-encoder retrieval (pipeline/retrieval.py) a
@@ -13,6 +15,10 @@ torch>=2.0
 # soubor — žádná systémová instalace není potřeba.
 torchaudio>=2.1
 imageio-ffmpeg>=0.5
+
+# Testování
+pytest>=8.0
+pytest-asyncio>=0.23
 
 # Instalace: python -m venv .venv && pip install -r pipeline/requirements.txt
 # `pipeline/claims.py` navíc vyžaduje proměnnou prostředí ANTHROPIC_API_KEY.

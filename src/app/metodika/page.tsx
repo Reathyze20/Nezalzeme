@@ -60,6 +60,112 @@ export default function MetodikaPage() {
           <Pravidlo nazev="Změna postoje" popis="Postoj se v čase posunul. Nezapočítává se mezi rozpory — měnit názor je legitimní. Zaznamenáváme ji jen proto, aby byl vývoj dohledatelný." posun />
         </div>
 
+        <h2 className="text-[20px] font-bold tracking-[-0.018em] mt-9 mb-2.5">Slovo a čin</h2>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Porovnávat mezi sebou dva projevy je slabé: politici mluví opatrně, podmíněně a s výhradami, takže
+          „opak dřívějšího výroku" se v připravených vystoupeních skoro nevyskytuje. Hlasování je proti tomu
+          binární a veřejné. Proto vedle sebe stavíme{" "}
+          <strong className="text-inkoust font-semibold">postoj z rozpravy a jmenovitý hlas o témže tisku</strong>.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Porovnává se výhradně s <strong className="text-inkoust font-semibold">finálním hlasováním</strong> o zákonu.
+          Není to naše klasifikace — které hlasování je finální, uvádí sama Sněmovna v historii tisku, a my na tu
+          stránku u každé položky odkazujeme. Je to nutné: Sněmovna pojmenovává všechna hlasování u otevřeného bodu
+          jménem toho bodu, takže u jednoho zákona nese stejný název i dvacet hlasování o pozměňovacích návrzích
+          a jedno o přerušení schůze. Bez téhle kotvy by šlo omylem tvrdit, že poslanec „hlasoval pro zákon“,
+          když hlasoval o přestávce.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Rozejde-li se postoj s hlasem, položka tím ještě neprojde. Musí obstát proti obhájci, který hledá výklad,
+          při kterém rozpor mizí — podmíněnou podporu („jsem pro, ale jen dočasně a za jasných podmínek“), souhlas
+          s principem místo s návrhem, nebo shodu s drtivou většinou klubu. Když takový výklad existuje,
+          nezveřejní se nic. U každé zveřejněné položky vidíte i{" "}
+          <strong className="text-inkoust font-semibold">poměr hlasů v klubu</strong> a případnou omluvu:
+          hlasovat s klubem je jiný příběh než hlasovat proti němu a omluvený poslanec není nepřítomný.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Tuhle dvojici <strong className="text-inkoust font-semibold">nerámujeme jako obvinění</strong>. Nemá
+          závažnost ani procento jistoty — jsou to dvě karty vedle sebe, obě s odkazem na originál. Rozchod slova
+          a hlasu sám o sobě neznamená nepravdu: návrh se mezi rozpravou a hlasováním mění a klub se dohaduje.
+          Závěr si dělá čtenář.
+        </p>
+
+        <h2 className="text-[20px] font-bold tracking-[-0.018em] mt-9 mb-2.5">Programová věrnost</h2>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Vedle konkrétních výroků poslanců porovnáváme i psaný slib vlády: text{" "}
+          <strong className="text-inkoust font-semibold">Programového prohlášení vlády</strong> (schváleno
+          5. 1. 2026) vedle hlasování klubů, které se k němu zavázaly — ANO 2011, Motoristé sobě a SPD.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Tahle dvojice nese jiné riziko než Slovo a čin. Tam spojení výroku s hlasováním určují otevřená data
+          Sněmovny — čísla, ne úsudek. Tady žádné takové spojení neexistuje: mezi textem vládního prohlášení
+          a číslem sněmovního tisku není žádná databázová vazba, a to, který tisk slib naplňuje, určuje model
+          podle <strong className="text-inkoust font-semibold">názvu tisku</strong> — plné znění zákona
+          k dispozici nemáme. Název bývá věcný, ale shoda tématu není totéž co shoda obsahu.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Proto má tohle spárování vlastní, přísnější pojistku: každé navržené spojení musí obstát v nezávislém
+          přezkumu druhým voláním modelu, které se ptá jen na jedno — odpovídá název tisku věcně konkrétnímu
+          opatření ze slibu, nebo jen širší oblasti? Při jakékoli pochybnosti spárování neplatí a nezveřejní se
+          nic; bezpečný směr je tu opačný než u obhájce ve Slovu a činu, protože riskantní tvrzení je tady
+          samo spojení, ne nesouhlas s ním. Publikuje se jen tisk s dokončeným projednáním a u hlasování vráceného
+          Senátem se bere to poslední, skutečně rozhodující.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          I po přezkumu je to <strong className="text-inkoust font-semibold">posouzení, ne fakt</strong> — proto
+          karta vždy ukazuje zdůvodnění spárování, aby šlo samostatně ověřit, a nikdy nevynáší verdikt
+          splněno/nesplněno. Vidíte slib, název tisku, výsledek hlasování a poměr hlasů v každém klubu vedle
+          sebe; závěr si děláte sami.
+        </p>
+
+        <h2 className="text-[20px] font-bold tracking-[-0.018em] mt-9 mb-2.5">Index věcnosti</h2>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Na profilu poslance vedle hlasovací bilance a SCI ukazujeme ještě dvě čistě{" "}
+          <strong className="text-inkoust font-semibold">počitatelné</strong> veličiny: kolik poslaneckých
+          návrhů zákonů poslanec za volební období předložil (vládní návrhy se nepočítají — u nich nese jméno
+          ministra funkci, ne autorství) a rozklad délky jeho vystoupení. Ani jedna položka tady nevzniká
+          z jazykového modelu — to je tvrdé pravidlo, ne stylistická volba. Jakmile věcnost začne posuzovat
+          model, je to subjektivní soud vydávaný za měření.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Počet návrhů zákonů je za <strong className="text-inkoust font-semibold">celé volební období</strong> —
+          stojí na kompletním dumpu Sněmovny, ne na tom, kolik jednacích dnů jsme stáhli textem. Rozklad délky
+          vystoupení naopak ANO — je vázaný na stažený vzorek stenozáznamů, a proto se u každého poslance
+          uvádí spolu s velikostí toho vzorku. Pod pěti vystoupeními ve vzorku se nepublikuje vůbec: nízké
+          číslo by tam mohlo znamenat malou aktivitu, nebo jen to, že poslanec mluvil hlavně mimo dny, které
+          zatím nemáme.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Žádné z toho neskládáme do jednoho čísla v žebříčku — to už platí pro SCI a stejně to platí tady.
+          Pořadí neurčuje redakce.
+        </p>
+
+        <h2 className="text-[20px] font-bold tracking-[-0.018em] mt-9 mb-2.5">Rolový obrat</h2>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Poslední doklad rejstříku porovnává citaci z novinového rozhovoru nebo vyjádření z
+          doby, kdy byl politik v opozici, s jeho pozdějším hlasováním ve vládní straně —
+          a naopak. Je to jediná veřejná část enginu, jejíž zdroj{" "}
+          <strong className="text-inkoust font-semibold">není oficiální záznam</strong>: stenozáznam
+          a hlasování jsou trvalé záznamy Sněmovny, novinový článek je něčí zpráva o tom, co bylo
+          řečeno.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Proto má tahle část navíc krok, který zbytek rejstříku nemá:{" "}
+          <strong className="text-inkoust font-semibold">ruční schválení</strong>. Engine
+          (Firecrawl nad vybranými zdroji, LLM extrahující jen přímé citace ověřené proti textu
+          článku, spárování s hlasováním a dvojí strojový přezkum) najde kandidáty do interního
+          nástroje — na veřejný web se dostane jen ten pár, u kterého si redaktor sám přečetl
+          zdrojový článek a citaci potvrdil. U každé karty je vidět datum tohoto schválení
+          a odkaz na originál článku, aby šel ověřit i vámi.
+        </p>
+        <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
+          Rolová nálepka (opozice / koalice / ministr) k datu citace i k datu hlasování pochází
+          přímo z otevřených dat o klubovém a vládním členství pro tohle volební období — ne
+          z odhadu. Citáty starší než začátek tohoto období (3. 11. 2025) se nepoužívají vůbec:
+          pro minulé volební období bychom roli museli tvrdit ručně, a to je přesně ten typ
+          vloženého faktu, kterému se rejstřík jinde vyhýbá.
+        </p>
+
         <h2 className="text-[20px] font-bold tracking-[-0.018em] mt-9 mb-2.5">Jak ověřujeme, než značku zveřejníme</h2>
         <p className="font-serif font-serif-text text-[17px] leading-[1.62] text-inkoust-2 mb-3.5">
           Každý kandidát na značku projde oponentním přezkumem: Žalobce postaví obžalobu, Obhájce hledá nejsilnější

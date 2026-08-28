@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { PoslanecZaznam } from "@/lib/poslanci";
-import { getKategorieMeta, getZavaznostLabel, formatJistota, formatDatum, hostname } from "@/lib/ui";
+import { getKategorieMeta, getZavaznostLabel, getConfidenceInterval, formatDatum, hostname } from "@/lib/ui";
 import { AnnotatedQuote } from "./AnnotatedQuote";
 import { KopirovatOdkaz } from "./AkceZaznamu";
 import { VideoEvidence } from "@/components/media/VideoEvidence";
@@ -18,12 +18,13 @@ interface DvojiceZaznamuProps {
  */
 export function DvojiceZaznamu({ zaznam }: DvojiceZaznamuProps) {
   const kategorie = getKategorieMeta(zaznam.kategorie);
+  const interval = getConfidenceInterval(zaznam.confidenceScore);
   const glyf = zaznam.jePosun ? "→" : "≠";
   const zdroj = hostname(zaznam.zaznamUrl);
 
   return (
     <article id={zaznam.id} className="py-8 border-b border-linka-2 scroll-mt-20">
-      <div className="flex items-baseline gap-3 flex-wrap mb-4">
+      <div className="flex items-baseline gap-2.5 flex-wrap mb-4">
         <span
           className={cn(
             "font-mono text-[10.5px] font-bold uppercase tracking-wider px-2 py-1 rounded-[2px]",
@@ -32,8 +33,51 @@ export function DvojiceZaznamu({ zaznam }: DvojiceZaznamuProps) {
         >
           {kategorie.label}
         </span>
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 font-mono text-[10.5px] font-semibold px-2 py-0.5 rounded-[2px] border",
+            interval.badgeClass
+          )}
+          title={`Vážené skóre důkazů: ${interval.pct} %`}
+        >
+          <span>{interval.icon}</span>
+          <span>{interval.label} ({interval.pct} %)</span>
+        </span>
+        {zaznam.debateTisk && zaznam.debateTisk.cisloTisku && (
+          <a
+            href={zaznam.debateTisk.url || undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-mono text-[10.5px] px-2 py-0.5 rounded-[2px] bg-sky-50 text-sky-800 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60 hover:underline"
+            title={zaznam.debateTisk.nazev || "Sněmovní tisk"}
+          >
+            <span>Tisk {zaznam.debateTisk.cisloTisku}</span>
+            <span className="text-sky-400">·</span>
+            <span>{zaznam.debateTisk.faze}</span>
+          </a>
+        )}
+        {zaznam.votingBallotId && (
+          <a
+            href={
+              zaznam.votingBallotId.match(/\d+/)?.[0]
+                ? `https://www.psp.cz/sqw/hlasy.sqw?g=${zaznam.votingBallotId.match(/\d+/)?.[0]}`
+                : undefined
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-mono text-[10.5px] px-2 py-0.5 rounded-[2px] bg-amber-50 text-amber-900 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-700/60 hover:underline font-medium"
+            title="Ověřit jmenovité hlasování v hlasovací knize PSP ČR"
+          >
+            <span>🗳️ {zaznam.votingBallotId}</span>
+            {zaznam.voteRecorded && (
+              <>
+                <span className="text-amber-400">·</span>
+                <span>Hlas: <strong>{zaznam.voteRecorded}</strong></span>
+              </>
+            )}
+          </a>
+        )}
         <span className="font-mono text-[11px] text-inkoust-3">{getZavaznostLabel(zaznam.severity)}</span>
-        <span className="font-mono text-[11px] text-inkoust-3">{formatJistota(zaznam.confidenceScore)}</span>
         <span className="font-mono text-[11.5px] text-inkoust-3 ml-auto">{zaznam.casZobrazeni}</span>
       </div>
 
@@ -106,11 +150,23 @@ export function DvojiceZaznamu({ zaznam }: DvojiceZaznamuProps) {
         </div>
       </div>
 
+      {zaznam.defenseEvaluated && (
+        <div className="mt-4 p-3.5 bg-list border border-linka-2 rounded-sm">
+          <div className="flex items-center gap-1.5 font-mono text-[10.5px] font-bold uppercase tracking-[0.1em] text-inkoust-3 mb-1">
+            <span>⚖️</span>
+            <span>Oponentní posouzení obhajoby</span>
+          </div>
+          <p className="font-serif font-serif-text text-[14px] leading-[1.55] text-inkoust-2 italic">
+            {zaznam.defenseEvaluated}
+          </p>
+        </div>
+      )}
+
       {zaznam.defensesConsidered && zaznam.defensesConsidered.length > 0 && (
-        <details className="mt-4 group">
+        <details className="mt-3 group">
           <summary className="cursor-pointer font-mono text-[11px] text-inkoust-2 hover:text-inkoust list-none flex items-center gap-1.5">
             <span className="inline-block transition-transform group-open:rotate-90">›</span>
-            Co jsme zvážili, než jsme značku potvrdili
+            Zvažované alternativní výklady ({zaznam.defensesConsidered.length})
           </summary>
           <div className="mt-3 pl-4 border-l border-linka-2 space-y-2">
             <ul className="space-y-1.5">
@@ -120,11 +176,6 @@ export function DvojiceZaznamu({ zaznam }: DvojiceZaznamuProps) {
                 </li>
               ))}
             </ul>
-            {zaznam.defenseEvaluated && (
-              <p className="font-serif font-serif-text text-[14px] leading-[1.5] text-inkoust italic pt-1">
-                {zaznam.defenseEvaluated}
-              </p>
-            )}
             {zaznam.arbiterRationale && (
               <p className="font-serif font-serif-text text-[14px] leading-[1.5] text-inkoust-2 pt-1">
                 <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-inkoust-3 mr-1.5">

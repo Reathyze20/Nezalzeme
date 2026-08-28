@@ -29,8 +29,32 @@ import os
 import sys
 from typing import Any, Dict, List, Optional
 
+# Makroekonomický kontext (ČSÚ + ČNB) — lazy import, aby modul šel importovat
+# i bez sítě (testy, offline prostředí).
+try:
+    from macro_context import format_for_defense, get_macro_context  # noqa: E402
+    _MACRO_AVAILABLE = True
+except ImportError:
+    _MACRO_AVAILABLE = False
+    def format_for_defense(macro):  # type: ignore
+        return ""
+    def get_macro_context(month, **kw):  # type: ignore
+        return {}
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+try:
+    import dotenv
+    _root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _env_file = os.path.join(_root_dir, ".env")
+    if os.path.exists(_env_file):
+        dotenv.load_dotenv(_env_file)
+    else:
+        dotenv.load_dotenv()
+except Exception:
+    pass
+
+from model_backend import clean_json_markdown  # noqa: E402
 from detector import normalize_anomaly_type  # noqa: E402
 
 TRIBUNAL_MODEL = "claude-sonnet-5"
@@ -71,8 +95,9 @@ def build_prosecutor_payload(candidate: Dict[str, Any], facts: List[Dict[str, An
 
 
 def parse_prosecutor_response(raw_json: str) -> Dict[str, Any]:
+    cleaned = clean_json_markdown(raw_json)
     try:
-        parsed = json.loads(raw_json)
+        parsed = json.loads(cleaned)
     except json.JSONDecodeError:
         return {"case": "", "keyEvidence": []}
     if not isinstance(parsed, dict):
@@ -85,20 +110,28 @@ def parse_prosecutor_response(raw_json: str) -> Dict[str, Any]:
 # -------------------------------------------------------------------------- #
 
 DEFENSE_PROMPT = """# ROLE: OBHÁJCE / ĎÁBLŮV ADVOKÁT (FÁZE 4)
-Dostaneš jednu kandidátní anomálii, její důkazy a `SAME_DAY_CONTEXT` —
-ostatní vystoupení téže rozpravy kolem časové značky. Tvým jediným
-úkolem je obhájit poslance.
+Dostaneš jednu kandidátní anomálii, její důkazy, `SAME_DAY_CONTEXT` (ostatní
+vystoupení téže rozpravy kolem časové značky), volitelně `MACRO_CONTEXT`
+(ověřené makroekonomické ukazatele z doby výroků — ČSÚ, ČNB) a volitelně
+`ROLE_CONTEXT` (politická role řečníka v době výroků — člen vlády vs. opozice).
+Tvým jediným úkolem je obhájit poslance.
 
 1. Formuluj 3 nejsilnější obhajoby, proč nejde o rozpor. Zvaž zejména:
    - projednávalo se jiné znění tisku nebo jiný pozměňovací návrh,
-   - mezi výroky se prokazatelně změnily makroekonomické či právní podmínky,
+   - mezi výroky se prokazatelně změnily makroekonomické či právní podmínky
+     (pokud `MACRO_CONTEXT` toto objektivně potvrzuje — např. prudký skok
+     inflace, hospodářská recese, změna základní sazby ČNB),
    - řečník reaguje na něco, co zaznělo ve `SAME_DAY_CONTEXT` (jiný
      řečník, procedurální bod, mimořádná událost dne),
    - řečník citoval nebo parafrázoval někoho jiného,
    - výrok byl míněn ironicky, jako hyperbola nebo metafora,
-   - řečník vystupoval v jiné roli (ministr vs. opoziční poslanec) k jinému předmětu.
-2. U každé obhajoby uveď, zda ji dodané podklady (včetně `SAME_DAY_CONTEXT`)
-   skutečně potvrzují. Nevymýšlej si kontext, který v podkladech není.
+   - řečník vystupoval v jiné roli (pokud `ROLE_CONTEXT` indikuje posun mezi
+     vládou a opozicí — např. ministr hájící vládní kompromis vs. dřívější
+     osobní opoziční postoj).
+2. U každé obhajoby uveď, zda ji dodané podklady (včetně `SAME_DAY_CONTEXT`,
+   `MACRO_CONTEXT` a `ROLE_CONTEXT`) skutečně potvrzují. Nevymýšlej si kontext,
+   který v podkladech není. Pokud `MACRO_CONTEXT` tvrzení o "ekonomické krizi" nebo
+   "změně reality" NEVYVRACÍ ani NEPOTVRZUJE, přiznej tuto mezeru výslovně.
 3. Doporuč (rozhodnutí je na Soudci, ne na tobě):
    - `passed: true` – žádná obhajoba neobstála, rozpor by měl zůstat,
    - `passed: false` – obhajoba prokázala změnu kontextu; navrhni
@@ -159,18 +192,38 @@ def _clock_to_minutes(clock: str) -> Optional[int]:
 
 
 def build_defense_payload(
-    candidate: Dict[str, Any], same_day_context: List[Dict[str, Any]]
+    candidate: Dict[str, Any],
+    same_day_context: List[Dict[str, Any]],
+    macro_context: Optional[Dict[str, Any]] = None,
+    role_context: Optional[Dict[str, Any]] = None,
 ) -> str:
-    payload = {
+    """
+    Sestaví payload pro Obhájce.
+
+    `macro_context` je slovník z `macro_context.get_macro_context()` pro měsíc
+    aktuálního výroku a srovnávací měsíc. Pokud je None nebo prázdný, klíč
+    MACRO_CONTEXT se do payloadu nepřidá.
+
+    `role_context` nese informace o politické roli mluvčího k datu obou výroků
+    (např. ministr vs. opoziční poslanec po volbách / výměně vlády).
+    """
+    payload: Dict[str, Any] = {
         "CANDIDATE_ANOMALY": candidate,
         "SAME_DAY_CONTEXT": same_day_context,
     }
+    if macro_context and macro_context.get("data_sources"):
+        formatted = format_for_defense(macro_context)
+        if formatted:
+            payload["MACRO_CONTEXT"] = formatted
+    if role_context:
+        payload["ROLE_CONTEXT"] = role_context
     return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 def parse_defense_response(raw_json: str) -> Dict[str, Any]:
+    cleaned = clean_json_markdown(raw_json)
     try:
-        parsed = json.loads(raw_json)
+        parsed = json.loads(cleaned)
     except json.JSONDecodeError:
         parsed = {}
     if not isinstance(parsed, dict):
@@ -190,29 +243,45 @@ def parse_defense_response(raw_json: str) -> Dict[str, Any]:
 # -------------------------------------------------------------------------- #
 
 ARBITER_PROMPT = """# ROLE: SOUDCE / ARBITR (FÁZE 4)
-Dostaneš tři věci: kandidátní anomálii, obžalobu Žalobce (`PROSECUTOR_CASE`)
-a doporučení Obhájce (`DEFENSE_RECOMMENDATION`). Obhájcovo doporučení NENÍ
-závazné — je to jen jeden ze dvou hlasů, které vážíš.
+Dostaneš kandidátní anomálii (včetně doslovných citací `targetSnippet` a `proof`),
+obžalobu Žalobce (`PROSECUTOR_CASE`) a doporučení Obhájce (`DEFENSE_RECOMMENDATION`).
 
-1. Zvaž, jestli obhajoba skutečně prokazuje změnu kontextu, nebo jen
-   formálně namítá, aniž by cokoliv doložila (formální obhajoba bez
-   opory v podkladech obstát nemá).
-2. Rozhodni finální verdikt:
-   - `passed: true` – rozpor zůstává v původní kategorii,
-   - `passed: false` s `downgradeTo: "VALUE_SHIFT"` – obhajoba prokázala
-     legitimní posun kontextu,
-   - `dismiss: true` – obhajoba prokázala, že o rozpor vůbec nejde.
-3. `arbiterRationale` musí být tvoje VLASTNÍ zdůvodnění, proč jsi obžalobu
-   a obhajobu takhle zvážil — ne přepis `defenseEvaluated`.
-4. Uveď finální `confidenceScore` (0–1).
+Tvým úkolem je nestranně a věcně posoudit, zda jde o:
+A) ZÁVAŽNÝ ROZPOR (`passed: true`),
+B) DOLOŽENOU ZMĚNU POSTOJE / VÝVOJ V ČASE (`passed: false` s `downgradeTo: "VALUE_SHIFT"`),
+C) FALEŠNÝ NÁLEZ / PROCEDURÁLNÍ ŠUM (`dismiss: true`).
+
+PRAVIDLA PRO ROZHODNUTÍ:
+1. `passed: true` (ZÁVAŽNÝ ROZPOR):
+   - Použij, pokud řečník prokazatelně a přímo popírá své dřívější jednoznačné tvrzení,
+     závazek či postoj bez objektivní změny reality (např. slib "daně nezvýšíme" vs.
+     "zvyšujeme daně", popření dřívějšího vyjádření, tvrzení o opaku téhož faktu).
+   - Formální politické výmluvy ("to bylo v opozici", "dnes je jiná situace") NESTAČÍ
+     na smazání rozporu.
+
+2. `passed: false` s `downgradeTo: "VALUE_SHIFT"` (DOLOŽENÁ ZMĚNA POSTOJE):
+   - Použij VŽDY, pokud politik v čase změnil svůj věcný postoj, názor či prioritu,
+     ale obhajoba doložila legitimní důvody posunu (např. koaliční kompromis,
+     převzetí vládní odpovědnosti, reakce na vnější ekonomický vývoj, inflaci, válku).
+   - TOTO JE JÁDRO PLATFORMY: Změna postoje v čase NENÍ lež, ale doložený fakt,
+     který má veřejnost vidět spolu s vyhodnocením obhajoby!
+   - Tyto případy NEZAMÍTEJ jako `dismiss: true`! Pokud došlo k názorovému posunu,
+     patří do `downgradeTo: "VALUE_SHIFT"`. Nastav odpovídající `confidenceScore` (0.80–0.94).
+
+3. `dismiss: true` (FALEŠNÝ NÁLEZ / PROCEDURÁLNÍ ŠUM):
+   - Použij POUZE tehdy, pokud o žádný rozpor ani změnu postoje vůbec nejde:
+     * Porovnání dvou různých hlasování či schůzí (např. hlasování č. 2 vs. č. 45),
+     * Situační procedurální fráze, oslovení ("nepřítomný premiér"), omluvy za limit řeči,
+     * Výrok a proti-výrok popisují dvě úplně nesouvisející věci nebo odlišné osoby,
+     * Výrok byl v kontextu jednoznačně ironií, hyperbolou nebo citací oponenta.
 
 Výstup je výhradně validní JSON:
 {
-  "passed": true,
-  "downgradeTo": null,
+  "passed": false,
+  "downgradeTo": "VALUE_SHIFT",
   "dismiss": false,
-  "confidenceScore": 0.9,
-  "arbiterRationale": "Vlastní zdůvodnění vážení obžaloby a obhajoby."
+  "confidenceScore": 0.88,
+  "arbiterRationale": "Vlastní věcné zdůvodnění vážení obžaloby a obhajoby."
 }
 """
 
@@ -224,6 +293,8 @@ def build_arbiter_payload(
         "CANDIDATE_ANOMALY": {
             "type": candidate.get("type"),
             "explanation": candidate.get("explanation"),
+            "targetSnippet": candidate.get("targetSnippet"),
+            "proof": candidate.get("proof"),
         },
         "PROSECUTOR_CASE": prosecutor_case,
         "DEFENSE_RECOMMENDATION": defense_verdict,
@@ -232,8 +303,9 @@ def build_arbiter_payload(
 
 
 def parse_arbiter_response(raw_json: str) -> Dict[str, Any]:
+    cleaned = clean_json_markdown(raw_json)
     try:
-        parsed = json.loads(raw_json)
+        parsed = json.loads(cleaned)
     except json.JSONDecodeError:
         parsed = {}
     if not isinstance(parsed, dict):
@@ -257,14 +329,39 @@ _SYSTEM_PROMPTS = {"PROSECUTOR": PROSECUTOR_PROMPT, "DEFENSE": DEFENSE_PROMPT, "
 def run_tribunal_role(role: str, payload: str, model: str = TRIBUNAL_MODEL) -> str:
     """
     Volá LLM pro jednu roli tribunálu. `role` je "PROSECUTOR" | "DEFENSE" |
-    "ARBITER" a vybírá systémový prompt. Jediné místo v modulu se skutečným
-    síťovým voláním — zbytek (`build_*_payload`, `parse_*_response`) jsou
-    čisté funkce testovatelné bez API klíče.
+    "ARBITER" a vybírá systémový prompt. Automaticky použije Gemini nebo Anthropic
+    podle přítomných klíčů.
     """
-    import anthropic
-
     if role not in _SYSTEM_PROMPTS:
         raise ValueError("neznámá role tribunálu: {}".format(role))
+
+    gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if gemini_key:
+        from google import genai
+        from google.genai import types
+
+        gemini_model = os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
+        client = genai.Client(api_key=gemini_key)
+        thinking_cfg = None
+        try:
+            thinking_cfg = types.ThinkingConfig(thinking_budget=0)
+        except Exception:
+            thinking_cfg = None
+
+        response = client.models.generate_content(
+            model=gemini_model,
+            contents=payload,
+            config=types.GenerateContentConfig(
+                system_instruction=_SYSTEM_PROMPTS[role],
+                response_mime_type="application/json",
+                temperature=0.0,
+                max_output_tokens=2048,
+                thinking_config=thinking_cfg,
+            ),
+        )
+        return clean_json_markdown(response.text or "")
+
+    import anthropic
 
     client = anthropic.Anthropic()
     response = client.messages.create(
@@ -273,7 +370,9 @@ def run_tribunal_role(role: str, payload: str, model: str = TRIBUNAL_MODEL) -> s
         system=_SYSTEM_PROMPTS[role],
         messages=[{"role": "user", "content": payload}],
     )
-    return "".join(block.text for block in response.content if block.type == "text")
+    return clean_json_markdown(
+        "".join(block.text for block in response.content if block.type == "text")
+    )
 
 
 # -------------------------------------------------------------------------- #

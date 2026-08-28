@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 const ODKAZY = [
   { href: "/", label: "Rejstřík" },
   { href: "/rozpravy", label: "Rozpravy" },
+  { href: "/programove-prohlaseni", label: "Programová věrnost" },
+  { href: "/rolovy-obrat", label: "Rolový obrat" },
   { href: "/metodika", label: "Metodika" },
 ];
 
