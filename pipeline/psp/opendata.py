@@ -17,7 +17,7 @@ jednací den. Jmenovité hlasování proto čte `psp.hlasovani` z HTML.
 import os
 import zipfile
 from datetime import date, datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .client import PspClient
 
@@ -26,6 +26,16 @@ TERM_ORGAN_ID = 174
 
 #: `id_typ_organu` = 1 znamená poslanecký klub.
 CLUB_TYPE_ID = 1
+
+#: Datum výměny vlády Fialy za vládu Babiše. Koaliční příslušnost klubu není
+#: v otevřených datech Sněmovny vůbec — organy.unl typ 5 dá jen členy vlády
+#: (ministry), ne to, které kluby vládu v Poslanecké sněmovně podpírají. To je
+#: politický fakt, ne strukturální, proto je tenhle seznam a datum editorská
+#: konstanta, ne odvozenina z dumpu; při další výměně vlády ji je třeba ručně
+#: doplnit o nový řádek, ne přepsat.
+GOVERNMENT_SWITCH_DATE = date(2025, 12, 15)
+COALITION_CLUBS_BEFORE_SWITCH = {"ODS", "KDU-ČSL", "TOP09", "STAN", "PIRÁTI", "PIRATI"}
+COALITION_CLUBS_AFTER_SWITCH = {"ANO2011", "ANO", "MS", "SPD"}
 
 
 def read_unl(archive_path: str, member: str) -> List[List[str]]:
@@ -86,6 +96,7 @@ class Registry:
         self.people: Dict[str, Person] = {}
         self.clubs: Dict[str, Dict[str, str]] = {}
         self._memberships: Dict[str, List[Tuple[str, Optional[date], Optional[date]]]] = {}
+        self._gov_memberships: Dict[str, List[Tuple[str, Optional[date], Optional[date]]]] = {}
         self._deputy_id: Dict[str, str] = {}
 
     @classmethod
@@ -95,6 +106,7 @@ class Registry:
         registry._load_people(archive)
         registry._load_clubs(archive)
         registry._load_memberships(archive)
+        registry._load_governments(archive)
         registry._load_deputies(archive)
         return registry
 
@@ -110,7 +122,7 @@ class Registry:
             if len(cols) < 8:
                 continue
             id_organ, parent, typ = cols[0], cols[1], cols[2]
-            if parent != self.term_organ_id or typ != str(CLUB_TYPE_ID):
+            if typ != str(CLUB_TYPE_ID):
                 continue
             self.clubs[id_organ] = {
                 "zkratka": cols[3],
@@ -118,6 +130,22 @@ class Registry:
                 "od": cols[6],
                 "do": cols[7],
             }
+
+    def _load_governments(self, archive: str) -> None:
+        """Načte intervaly členství ve vládách ČR (typ orgánu = 5)."""
+        gov_ids = set()
+        for cols in read_unl(archive, "organy.unl"):
+            if len(cols) > 2 and cols[2] == "5":
+                gov_ids.add(cols[0])
+        for cols in read_unl(archive, "zarazeni.unl"):
+            if len(cols) < 5:
+                continue
+            id_osoba, id_of, cl_funkce = cols[0], cols[1], cols[2]
+            if cl_funkce != "0" or id_of not in gov_ids:
+                continue
+            self._gov_memberships.setdefault(id_osoba, []).append(
+                (id_of, _parse_date(cols[3]), _parse_date(cols[4]))
+            )
 
     def _load_memberships(self, archive: str) -> None:
         club_ids = set(self.clubs)
@@ -136,6 +164,48 @@ class Registry:
         for cols in read_unl(archive, "poslanec.unl"):
             if len(cols) >= 5 and cols[4] == self.term_organ_id:
                 self._deputy_id[cols[1]] = cols[0]
+
+    # -- dotazy ------------------------------------------------------------
+
+    def is_government_member(self, id_osoba: str, when: date) -> bool:
+        """Zda byla osoba k danému dni členem Vlády ČR."""
+        for id_organ, since, until in self._gov_memberships.get(str(id_osoba), []):
+            if since and when < since:
+                continue
+            if until and when > until:
+                continue
+            return True
+        return False
+
+    def political_role_at(self, id_osoba: str, when: date) -> Dict[str, Any]:
+        """
+        Určí politickou roli osoby k danému datu:
+        - role: 'MINISTER' (člen vlády), 'COALITION_DEPUTY', 'OPPOSITION_DEPUTY', 'INDEPENDENT'
+        - club: zkratka klubu k datu
+        - isGovernment: přímý člen vlády
+        """
+        is_gov = self.is_government_member(id_osoba, when)
+        club = self.club_at(id_osoba, when)
+
+        coalition_clubs = (
+            COALITION_CLUBS_BEFORE_SWITCH if when < GOVERNMENT_SWITCH_DATE
+            else COALITION_CLUBS_AFTER_SWITCH
+        )
+
+        if is_gov:
+            role = "MINISTER"
+        elif club and club.upper() in coalition_clubs:
+            role = "COALITION_DEPUTY"
+        elif club:
+            role = "OPPOSITION_DEPUTY"
+        else:
+            role = "INDEPENDENT"
+
+        return {
+            "role": role,
+            "club": club or "",
+            "isGovernment": is_gov,
+        }
 
     # -- dotazy ------------------------------------------------------------
 
@@ -184,6 +254,17 @@ class Registry:
     def deputy_id(self, id_osoba: str) -> Optional[str]:
         """`id_poslanec` pro dané volební období (klíč hlasovacích dumpů)."""
         return self._deputy_id.get(str(id_osoba))
+
+    def deputy_ids(self):
+        """
+        Všechny dvojice `(id_osoba, id_poslanec)` pro dané volební období.
+
+        Veřejný pohled na `_deputy_id` — hlasovací dumpy (`hl2025h1.unl`,
+        `omluvy.unl`) identifikují člověka přes `id_poslanec`, takže kdokoli
+        z nich počítá poměry po klubech, potřebuje mapování zpátky na
+        `id_osoba`, na kterém stojí `club_at()`.
+        """
+        return self._deputy_id.items()
 
     def summary(self) -> str:
         return "rejstřík: {} osob, {} klubů, {} poslanců období {}".format(
