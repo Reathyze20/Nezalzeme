@@ -622,9 +622,17 @@ export interface RolovyObrat {
     rolePriCitatu: PolitickaRole;
     zdroj: {
       url: string;
-      /** Doména zdroje (např. „seznamzpravy.cz") — ne plný název média. */
+      /** Doména zdroje (např. „seznamzpravy.cz") nebo „YouTube · <kanál>" u videa. */
       medium: string;
+      /** U videa: datum publikace videa (ne datum zveřejnění článku). */
       datumClanku: string;
+      /**
+       * Jen u zdroje typu video (Fáze 6c) — orientační vteřina, kde citace v
+       * přepisu začíná. Odvozeno z pořadí úseků diarizovaného přepisu, NE
+       * forenzní forced-alignment přesnost (na rozdíl od `mediaEvidence`
+       * u stenozáznamu) — proto se řetězec citace vždy ověřuje samostatně.
+       */
+      timestampSeconds?: number;
     };
   };
   postoj: 'PRO' | 'PROTI';

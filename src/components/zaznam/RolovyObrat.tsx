@@ -2,6 +2,23 @@ import React from "react";
 import { ExternalLink } from "lucide-react";
 import { RolovyObrat as RolovyObratZaznam, PolitickaRole, VoteValue } from "@/types/debate";
 import { formatDatum, getVoteValueLabel } from "@/lib/ui";
+import { formatTimestamp } from "@/lib/media";
+
+/**
+ * U videa (Fáze 6c) přidá `t=Ns` (YouTube podporuje na obou tvarech domény),
+ * jinak URL beze změny. Časová značka je jen orientační pozice v přepisu —
+ * ne forenzní forced alignment (viz `RolovyObrat.timestampSeconds` v `debate.ts`).
+ */
+function withTimestamp(url: string, seconds?: number): string {
+  if (seconds === undefined) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("t", `${Math.max(0, Math.floor(seconds))}s`);
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
 
 interface RolovyObratProps {
   zaznam: RolovyObratZaznam;
@@ -69,12 +86,14 @@ export function RolovyObrat({ zaznam }: RolovyObratProps) {
             {receno.zdroj.medium} · {formatDatum(receno.zdroj.datumClanku)}
           </div>
           <a
-            href={receno.zdroj.url}
+            href={withTimestamp(receno.zdroj.url, receno.zdroj.timestampSeconds)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 self-start font-mono text-[11px] text-overeno border-b border-overeno/10 hover:border-overeno pb-0.5 transition-colors"
           >
-            originál článku
+            {receno.zdroj.timestampSeconds !== undefined
+              ? `originál videa od ${formatTimestamp(receno.zdroj.timestampSeconds)}`
+              : "originál článku"}
             <ExternalLink className="w-3 h-3" aria-hidden />
           </a>
         </div>
@@ -150,8 +169,8 @@ export function RolovyObrat({ zaznam }: RolovyObratProps) {
       </div>
 
       <p className="mt-4 font-mono text-[10.5px] text-inkoust-3 leading-[1.55] max-w-[80ch]">
-        Citace pochází z novinového článku, ne ze stenozáznamu — ověřte ji prosím v originále
-        (odkaz výše), než ji použijete dál. Postoj z citace určil jazykový model; jeho
+        Citace pochází z novinového článku nebo videa, ne ze stenozáznamu — ověřte ji prosím
+        v originále (odkaz výše), než ji použijete dál. Postoj z citace určil jazykový model; jeho
         odůvodnění: „{zaznam.postojOduvodneni}". Hlas i to, že šlo o finální hlasování o tomto
         tisku, pocházejí z otevřených dat Sněmovny. Rozchod postoje a hlasu sám o sobě
         neznamená nepravdu ani pokrytectví — tenhle konkrétní pár před zveřejněním ručně

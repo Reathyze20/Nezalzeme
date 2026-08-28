@@ -38,6 +38,7 @@ pipeline/data/engine.sqlite
 pipeline/data/hlidac_cache.sqlite
 pipeline/data/hlidac_profiles.json
 pipeline/data/firecrawl_cache.sqlite
+pipeline/data/transcriptapi_cache.sqlite
 
 # Interní novinářský nástroj (Fáze 6) — nikdy commitovat: neověřené leady
 # pod skutečnými jmény, patří jen za /interni/prehled (HTTP Basic Auth).

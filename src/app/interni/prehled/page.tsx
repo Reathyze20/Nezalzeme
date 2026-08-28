@@ -104,8 +104,17 @@ function RolovyObratKarta({ lead }: { lead: RolovyObratLead }) {
           </div>
           <div className="mt-2 font-mono text-[10.5px] text-inkoust-3">
             {lead.receno.zdroj.medium} · {lead.receno.zdroj.datumClanku} ·{" "}
-            <a href={lead.receno.zdroj.url} target="_blank" rel="noreferrer" className="text-overeno underline">
-              originál
+            <a
+              href={
+                lead.receno.zdroj.timestampSeconds !== undefined
+                  ? `${lead.receno.zdroj.url}${lead.receno.zdroj.url.includes("?") ? "&" : "?"}t=${Math.max(0, Math.floor(lead.receno.zdroj.timestampSeconds))}s`
+                  : lead.receno.zdroj.url
+              }
+              target="_blank"
+              rel="noreferrer"
+              className="text-overeno underline"
+            >
+              originál{lead.receno.zdroj.timestampSeconds !== undefined ? " (video)" : ""}
             </a>
           </div>
         </div>

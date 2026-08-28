@@ -20,6 +20,8 @@ k rozhodnutí, ne hotový výstup.
 Řetěz, na kterém to stojí — každý článek znovupoužitý, ne nově vymyšlený:
 
     Firecrawl /v1/search -> kandidátní články     [journalist_tool.search_related_articles]
+    is_source_allowed(url)                         [source_ranking.py, Fáze 6e — blokuje tier 4/5]
+    _looks_like_listing_page(url)                  [Fáze 6f — přeskočí téma/tag/přehled dřív, než se scrapuje]
     Firecrawl /v1/scrape -> markdown článku        [fetch_article_markdown, nová cache]
     LLM (přísný prompt) -> přímé citace politika   [extract_attributed_quotes, nové]
       -> ověření: řetězec v markdownu + jméno poblíž + délkový limit
@@ -66,6 +68,7 @@ except Exception:
 from db import cache_key, now_iso  # noqa: E402
 from journalist_tool import search_related_articles  # noqa: E402
 from psp.facts import ENGINE_SQLITE_PATH  # noqa: E402
+from source_ranking import is_source_allowed  # noqa: E402
 from programova_vernost import (  # noqa: E402
     challenge_pairing,
     find_tisk_candidate,
@@ -113,10 +116,10 @@ def _is_opposition_side(role: str) -> bool:
 # --------------------------------------------------------------------------- #
 
 def resolve_id_osoba(registry, jmeno: str) -> Optional[str]:
-    """Jméno -> `id_osoba` přes `Person.full_name()`. Bez shody `None`, žádné hádání."""
+    """Jméno -> `id_osoba` přes `Person.full_name`. Bez shody `None`, žádné hádání."""
     jmeno_norm = jmeno.strip().casefold()
     for id_osoba, person in registry.people.items():
-        if person.full_name().strip().casefold() == jmeno_norm:
+        if person.full_name.strip().casefold() == jmeno_norm:
             return id_osoba
     return None
 
@@ -184,12 +187,154 @@ def _parse_article_date(metadata: Dict[str, Any]) -> Optional[str]:
         return None
 
 
+_TIME_DATETIME_RE = re.compile(r'<time[^>]*\bdatetime="(\d{4}-\d{2}-\d{2})[^"]*"')
+
+
+def _valid_past_date(raw: Optional[str]) -> Optional[str]:
+    """`YYYY-MM-DD`, ověřené jako platné a ne v budoucnosti, jinak `None`."""
+    if not raw:
+        return None
+    try:
+        parsed = datetime.strptime(str(raw)[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return None
+    if parsed > date.today():
+        return None
+    return parsed.isoformat()
+
+
+def _parse_date_from_time_tag(html: str) -> Optional[str]:
+    """
+    Záložní zdroj data, když ho Firecrawl nevrátí ve strukturovaných meta
+    tazích (ověřeno živě: běžné u českých zpravodajských webů —
+    seznamzpravy.cz/respekt.cz/ct24 apod. datum v `<head>` metadatech
+    nemají, ale mají ho v `<time datetime="...">` přímo v těle stránky).
+    Bere PRVNÍ takový element v dokumentu — u zpravodajských CMS to
+    spolehlivě odpovídá datu vlastního článku (ověřeno na živém příkladu:
+    další `<time>` prvky na stránce patří k „mohlo by vás zajímat"
+    dlaždicím níž, ne k článku samotnému). Pořád čtení skutečného
+    strukturovaného HTML5 elementu, ne hádání data z volného textu —
+    proto se to nepočítá jako odhad ve smyslu zákazu výš. Datum v
+    budoucnosti (špatně zachycený `<time>` prvek) se zahodí jako
+    nedůvěryhodné, ne provizorně přijme.
+    """
+    match = _TIME_DATETIME_RE.search(html)
+    if not match:
+        return None
+    return _valid_past_date(match.group(1))
+
+
+def _parse_date_with_htmldate(html: str) -> Optional[str]:
+    """
+    Druhý záložní zdroj, pro weby, které `<time datetime="...">` vůbec
+    nepoužívají (ověřeno živě: info.cz, ct24.ceskatelevize.cz a další —
+    ani strukturovaná meta, ani tenhle konkrétní HTML5 vzor). `htmldate`
+    (nezávislá, hodně používaná knihovna z `trafilatura` ekosystému) zkouší
+    víc strukturovaných zdrojů najednou (JSON-LD, Open Graph, další HTML5
+    datové vzory, vzor v URL), než bychom sami udrželi jedním regexem na
+    doménu.
+
+    Voláno záměrně s `extensive_search=False`: výchozí režim knihovny má
+    fallback na hledání data ve VOLNÉM TEXTU stránky, a přesně tohle jsme
+    u vlastního regexu na `<time>` už jednou živě nachytali jako nebezpečné
+    — reálný scrape jinam vrátil datum z „mohlo by vás zajímat" panelu, ne
+    z článku samotného (viz `_parse_date_from_time_tag`). Konzervativní
+    režim čte jen strukturovaná pole — stejná disciplína jako zbytek
+    modulu, nikdy odhad z volného textu.
+
+    Nepovinná závislost — bez nainstalovaného `htmldate` se krok tiše
+    přeskočí, žádná nová tvrdá závislost na běhu bez něj.
+    """
+    try:
+        from htmldate import find_date
+    except ImportError:
+        return None
+    try:
+        raw = find_date(html, extensive_search=False, outputformat="%Y-%m-%d")
+    except Exception:
+        return None
+    return _valid_past_date(raw)
+
+
+def _parse_date_from_html(html: str) -> Optional[str]:
+    """
+    Oba záložní zdroje data z HTML, v pořadí levnější/přesnější napřed:
+    `<time datetime>` (`_parse_date_from_time_tag`), a jen když ten nic
+    nenajde, `htmldate` v konzervativním režimu (`_parse_date_with_htmldate`).
+    """
+    return _parse_date_from_time_tag(html) or _parse_date_with_htmldate(html)
+
+
+def _no_date_reason(metadata: Dict[str, Any], html: str) -> str:
+    """
+    Krátký diagnostický popis, PROČ `datumClanku` vyšlo `None` — jen do
+    keše vedle výsledku, nikdy se nepoužívá k rozhodování (na rozdíl od
+    `datumClanku` samotného, který jediný řídí, jestli citát z téhle
+    stránky přežije `build_role_flip_leads`). Zjištěno živou dávkovou
+    diagnózou nad 8 poslanci (2026-08-28, viz analýza v konverzaci): bez
+    tohohle záznamu nejde z keše zpětně rozlišit „stránka fakt nemá <time>
+    tag" od „htmldate ho v konzervativním režimu zahodil", a stejná
+    analýza příště by musela dělat nové (a drahé) síťové volání jen kvůli
+    tomuhle rozlišení.
+    """
+    ma_meta_klic = any(
+        metadata.get(k) for k in ("publishedTime", "article:published_time", "datePublished")
+    )
+    ma_time_tag = bool(_TIME_DATETIME_RE.search(html))
+    return ",".join([
+        "meta:nevalidni" if ma_meta_klic else "meta:prazdna",
+        "time-tag:nevalidni" if ma_time_tag else "time-tag:chybi",
+        "htmldate:bez-vysledku",
+    ])
+
+
+_LISTING_HOSTS = {"youtube.com", "facebook.com", "m.facebook.com"}
+_LISTING_PATH_MARKERS = ("/tema/", "/tag/", "/tagy/", "/stitky/")
+
+
+def _looks_like_listing_page(url: str) -> bool:
+    """
+    Konzervativní blacklist stránek, které STRUKTURÁLNĚ nemají vlastní
+    datum publikace (téma/tag/přehled, video/sociální síť) — vyřazeno ještě
+    před Firecrawl `/v1/scrape`, aby se neplýtval kredit na něco, co
+    `build_role_flip_leads` stejně zahodí kvůli chybějícímu `datumClanku`.
+    Ověřeno na živých datech (2026-08-28, dávka 8 poslanců): 22 ze 45
+    kandidátních URL bylo přesně tohohle typu.
+
+    Záměrně ÚZKÝ seznam, ne obecné pravidlo typu „jeden segment cesty" —
+    stejná dávková diagnóza ukázala, že vzory jako `archiv.hn.cz/c1-NNNNNNNN-slug`,
+    `cnn.iprima.cz/slug-NNNNNN` nebo `*.gov.cz/.../slug-DDMMYYYY` vypadají
+    podobně "ploše" jako přehledová stránka, ale jsou to skutečné datované
+    články. Cena falešného zamítnutí tady NENÍ nulová (na rozdíl od
+    `source_ranking.is_source_allowed`, kde další článek je zadarmo) —
+    proto radši nechat pár skutečných přehledových stránek projít dál (o
+    řádek níž je stejně zahodí chybějící `datumClanku`), než omylem
+    přeskočit reálný článek.
+    """
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.netloc.lower()
+    if host.startswith("www."):
+        host = host[4:]
+    if host in _LISTING_HOSTS:
+        return True
+    path = parsed.path.lower()
+    if any(marker in path for marker in _LISTING_PATH_MARKERS):
+        return True
+    if path.rstrip("/") == "/aktualne":
+        return True
+    return False
+
+
 def fetch_article_markdown(url: str, api_key: Optional[str] = None, timeout: int = 20) -> Optional[Dict[str, Any]]:
     """
     Firecrawl `/v1/scrape` -> `{"markdown", "medium", "datumClanku"}`.
 
-    `datumClanku` je `None`, když Firecrawl datum publikace nevrátí —
-    `build_role_flip_leads` takové citáty zahazuje, nikdy datum neodhaduje.
+    Datum se zkusí nejdřív ze strukturovaných meta tagů (`_parse_article_date`),
+    a chybí-li tam (běžné u českých webů), z HTML přes `_parse_date_from_html`
+    — ten sám zkusí nejdřív `<time datetime="...">`, a bez něj `htmldate`
+    v konzervativním režimu. Všechny tři jsou čtení skutečného strukturovaného
+    pole ze stránky, nikdy odhad z volného textu článku. Selžou-li všechny,
+    `datumClanku` je `None` a `build_role_flip_leads` takové citáty zahazuje.
     """
     api_key = api_key or os.environ.get("FIRECRAWL_API_KEY", "")
     if not api_key or not url:
@@ -200,7 +345,7 @@ def fetch_article_markdown(url: str, api_key: Optional[str] = None, timeout: int
     if cached is not None:
         return cached
 
-    body = json.dumps({"url": url, "formats": ["markdown"]}).encode("utf-8")
+    body = json.dumps({"url": url, "formats": ["markdown", "html"]}).encode("utf-8")
     req = urllib.request.Request(
         "https://api.firecrawl.dev/v1/scrape",
         data=body,
@@ -218,12 +363,16 @@ def fetch_article_markdown(url: str, api_key: Optional[str] = None, timeout: int
     if not markdown:
         return None
     metadata = data.get("metadata", {}) or {}
+    html = data.get("html", "") or ""
+    datum = _parse_article_date(metadata) or _parse_date_from_html(html)
 
     result = {
         "markdown": markdown,
         "medium": urllib.parse.urlparse(url).netloc,
-        "datumClanku": _parse_article_date(metadata),
+        "datumClanku": datum,
     }
+    if not datum:
+        result["datumDuvodChybi"] = _no_date_reason(metadata, html)
     _scrape_cache_set(cache_key_, result)
     return result
 
@@ -290,6 +439,92 @@ def extract_attributed_quotes(
         if not _name_near_quote(markdown, citace, surname):
             continue
         out.append({"citace": citace})
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# Extrakce citací z videa (Fáze 6c) — mluvčí už ověřen diarizací + ručním
+# přiřazením v `tag_video_speaker.py`, netřeba znovu kontrolovat "čí je to
+# citace" jako u článků (`_name_near_quote`) — všechen dodaný text patří
+# jednomu mluvčímu z konstrukce (filtr podle `speaker_label` v
+# `video_diarization.merge_transcript_with_diarization`).
+# --------------------------------------------------------------------------- #
+
+VIDEO_QUOTE_EXTRACTION_PROMPT = """# ROLE: extrakce citovatelných výroků z přepisu mluvčího
+
+Dostaneš automatický přepis (ASR, může obsahovat drobné chyby nebo rušivé
+zvuky) řeči JEDNOHO konkrétního politika — celý dodaný text patří jemu,
+mluvčí je už ověřený diarizací a ručním přiřazením, netřeba ho znovu ověřovat.
+
+Pravidla:
+1. Vyber věty, které tvoří srozumitelný, ucelený výrok — ne torzo věty
+   přeťaté chybou přepisu nebo cizí vloženou promluvou.
+2. `citace` musí být DOSLOVNÝ, nezkrácený úryvek z dodaného textu — žádné
+   spojování vět z různých míst, žádná parafráze ani oprava přepisu.
+3. Kratší přesná citace je lepší než delší nepřesná. Nejvýš 400 znaků na citaci.
+4. Když si nejsi jistý/á srozumitelností nebo úplností výroku, vynech ho —
+   je v pořádku vrátit prázdný seznam.
+5. Nejvýš 5 nejvýznamnějších citací.
+
+Vrať POUZE JSON pole:
+[{"citace": "<doslovný úryvek z textu>"}]
+"""
+
+
+def _speaker_full_text_with_offsets(speaker_segments: List[Dict[str, Any]]):
+    """Spojí úseky mezerou a vrátí `(plný_text, [(start_char, end_char, úsek), ...])`."""
+    parts = []
+    offsets = []
+    pos = 0
+    for seg in speaker_segments:
+        text = seg.get("text", "")
+        offsets.append((pos, pos + len(text), seg))
+        parts.append(text)
+        pos += len(text) + 1
+    return " ".join(parts), offsets
+
+
+def _locate_quote_timestamp(speaker_segments: List[Dict[str, Any]], citace: str) -> Optional[float]:
+    """Vteřina úseku, ve kterém citace v spojeném textu začíná — orientační, ne forenzní přesnost."""
+    full_text, offsets = _speaker_full_text_with_offsets(speaker_segments)
+    idx = full_text.find(citace)
+    if idx == -1:
+        return None
+    for start_char, end_char, seg in offsets:
+        if idx < end_char:
+            return seg.get("start")
+    return offsets[-1][2].get("start") if offsets else None
+
+
+def extract_quotes_from_speaker_text(
+    backend, speaker_segments: List[Dict[str, Any]], politician_name: str, model_name: str
+) -> List[Dict[str, Any]]:
+    """LLM navrhne citace z přepisu; každá musí přežít podřetězcovou kontrolu a mít dohledatelný timestamp."""
+    full_text, _ = _speaker_full_text_with_offsets(speaker_segments)
+    payload = {"POLITIK": politician_name, "PREPIS": full_text[:20000]}
+    user_payload = json.dumps(payload, ensure_ascii=False)
+    ck = cache_key(model_name, "MRF_VIDEO_CITACE::{}::{}".format(PROMPT_VERSION, user_payload))
+    raw = backend.call("MRF_VIDEO_CITACE", VIDEO_QUOTE_EXTRACTION_PROMPT, user_payload, model_name, ck=ck)
+    try:
+        parsed = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return []
+    if not isinstance(parsed, list):
+        return []
+
+    out = []
+    for item in parsed:
+        if not isinstance(item, dict):
+            continue
+        citace = str(item.get("citace", "")).strip()
+        if not citace or len(citace) > MAX_QUOTE_CHARS:
+            continue
+        if full_text.find(citace) == -1:
+            continue
+        timestamp = _locate_quote_timestamp(speaker_segments, citace)
+        if timestamp is None:
+            continue
+        out.append({"citace": citace, "timestampSeconds": timestamp})
     return out
 
 
@@ -436,6 +671,10 @@ def build_role_flip_leads(
 
         articles = search_related_articles(f"{jmeno} rozhovor vyjádření", api_key=firecrawl_key, limit=limit_clanky)
         for article in articles:
+            if not is_source_allowed(article["url"]):
+                continue
+            if _looks_like_listing_page(article["url"]):
+                continue
             scraped = fetch_article_markdown(article["url"], api_key=firecrawl_key)
             if not scraped or not scraped.get("datumClanku"):
                 continue
@@ -527,6 +766,132 @@ def build_role_flip_leads(
     return results
 
 
+def build_role_flip_leads_from_video(
+    video_urls: List[str], conn, registry, tisky_registry, client, backend, model_name: str,
+) -> List[Dict[str, Any]]:
+    """
+    Pro každé video: jen jeho ručně tagovaní mluvčí (`video_speakers.id_osoba
+    IS NOT NULL`) — netagovaní se přeskočí beze zmínky, ne odhadují. Od
+    `find_tisk_candidate` dál stejná brána jako `build_role_flip_leads`.
+    Vyžaduje `prepare_video_speakers.py` + `tag_video_speaker.py` předem.
+    """
+    organ = str(registry.term_organ_id)
+    tisky_pro_prompt = [
+        {"cislo": info.cislo, "nazev": info.cely_nazev} for info in tisky_registry.all_for_organ(organ)
+    ]
+
+    results = []
+    for video_url in video_urls:
+        cache_row = conn.execute(
+            "SELECT medium, datum_videa, segments_json FROM video_transcript_cache WHERE video_url = ?",
+            (video_url,),
+        ).fetchone()
+        if not cache_row:
+            print(f"  [-] {video_url}: chybí zpracovaný přepis (spusť prepare_video_speakers.py)")
+            continue
+        medium, datum_videa, merged = cache_row["medium"], cache_row["datum_videa"], json.loads(cache_row["segments_json"])
+        if not datum_videa:
+            continue
+        try:
+            video_datum = datetime.strptime(datum_videa, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if video_datum < TERM_START_DATE:
+            continue
+
+        speaker_rows = conn.execute(
+            "SELECT speaker_label, id_osoba FROM video_speakers WHERE video_url = ? AND id_osoba IS NOT NULL",
+            (video_url,),
+        ).fetchall()
+        if not speaker_rows:
+            print(f"  [-] {video_url}: žádný mluvčí není označen (spusť tag_video_speaker.py)")
+            continue
+
+        for row in speaker_rows:
+            speaker_label, id_osoba = row["speaker_label"], row["id_osoba"]
+            person = registry.people.get(id_osoba)
+            if not person:
+                continue
+            jmeno = person.full_name
+
+            speaker_segments = [s for s in merged if s.get("speaker") == speaker_label]
+            if not speaker_segments:
+                continue
+
+            role_pri_citatu = registry.political_role_at(id_osoba, video_datum)["role"]
+            if not (_is_government_side(role_pri_citatu) or _is_opposition_side(role_pri_citatu)):
+                continue
+
+            quotes = extract_quotes_from_speaker_text(backend, speaker_segments, jmeno, model_name)
+            zdroj = {"url": video_url, "medium": medium, "datumClanku": datum_videa}
+
+            for quote in quotes:
+                kandidat = find_tisk_candidate(backend, quote["citace"], tisky_pro_prompt, model_name)
+                if not kandidat:
+                    continue
+                tisk_info = tisky_registry.get_tisk(kandidat["cislo"], organ=organ)
+                if not tisk_info:
+                    continue
+
+                final_vote = latest_final_vote(client, kandidat["cislo"], conn, id_organ=organ)
+                if not final_vote or not final_vote.get("idHlasovani"):
+                    continue
+                vote_row = conn.execute(
+                    "SELECT datum, cas FROM hlasovani WHERE id_hlasovani = ?",
+                    (final_vote["idHlasovani"],),
+                ).fetchone()
+                if not vote_row:
+                    continue
+                try:
+                    hlasovani_datum = datetime.strptime(vote_row["datum"], "%d.%m.%Y").date()
+                except ValueError:
+                    continue
+
+                role_pri_hlasovani = registry.political_role_at(id_osoba, hlasovani_datum)["role"]
+                if _is_government_side(role_pri_citatu) == _is_government_side(role_pri_hlasovani):
+                    continue
+                if not (_is_government_side(role_pri_hlasovani) or _is_opposition_side(role_pri_hlasovani)):
+                    continue
+
+                id_poslanec = registry.deputy_id(id_osoba)
+                vote = resolve_vote(
+                    client, conn, final_vote["idHlasovani"], id_osoba, id_poslanec,
+                    vote_row["datum"], vote_row["cas"], id_organ=organ,
+                )
+                if not vote:
+                    continue
+
+                stance = classify_stance(backend, {"rawSpan": quote["citace"]}, tisk_info.cely_nazev, model_name)
+                if stance["postoj"] not in PUBLIKOVATELNE_POSTOJE:
+                    continue
+                klub_pomer = klub_tally_for_ballot(
+                    conn, registry, final_vote["idHlasovani"], vote.get("klub") or "", hlasovani_datum,
+                )
+
+                record = build_record(
+                    id_osoba, jmeno, quote["citace"], dict(zdroj, timestampSeconds=quote["timestampSeconds"]),
+                    role_pri_citatu, tisk_info, final_vote, stance, vote, role_pri_hlasovani, klub_pomer,
+                )
+
+                prezkum_parovani = challenge_pairing(
+                    backend, quote["citace"], tisk_info.cely_nazev, kandidat["zduvodneni"], model_name,
+                )
+                rozpor_mizi = True
+                if record["shoda"] == "NESHODA":
+                    obhajoba = challenge_mismatch(backend, record, model_name)
+                    rozpor_mizi = obhajoba["rozporMizi"]
+                    record["obhajoba"] = obhajoba["vyklad"]
+
+                record["parovani"] = prezkum_parovani["vyklad"]
+                store_record(
+                    conn, record, model_name,
+                    parovani_plati=prezkum_parovani["parovaniPlati"], rozpor_mizi=rozpor_mizi,
+                )
+                results.append(record)
+
+    return results
+
+
 def main() -> None:
     import argparse
 
@@ -536,15 +901,21 @@ def main() -> None:
     from psp.tisky import TiskyRegistry
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--poslanec", action="append", required=True, dest="poslanci",
-                        help="Celé jméno politika (opakovatelné).")
+    parser.add_argument("--poslanec", action="append", default=[], dest="poslanci",
+                        help="Celé jméno politika (opakovatelné) — hledá v novinových článcích.")
+    parser.add_argument("--video", action="append", default=[], dest="videa",
+                        help="URL videa, zpracovaného přes prepare_video_speakers.py (opakovatelné).")
     parser.add_argument("--limit-clanky", type=int, default=DEFAULT_LIMIT_CLANKY)
     parser.add_argument("--backend", choices=["auto", "gemini", "api", "jsonl"], default="auto")
     args = parser.parse_args()
 
+    if not args.poslanci and not args.videa:
+        print("zadej --poslanec (články) nebo --video (zpracovaná videa), aspoň jedno.")
+        return
+
     firecrawl_key = os.environ.get("FIRECRAWL_API_KEY", "")
-    if not firecrawl_key:
-        print("FIRECRAWL_API_KEY chybí v .env — bez něj nemá tenhle nástroj co dělat.")
+    if args.poslanci and not firecrawl_key:
+        print("FIRECRAWL_API_KEY chybí v .env — bez něj --poslanec nemá co dělat.")
         return
 
     from claims import CLAIM_EXTRACTION_MODEL
@@ -572,10 +943,16 @@ def main() -> None:
     registry = Registry.load(client)
     tisky_registry = TiskyRegistry.load(client)
 
-    leads = build_role_flip_leads(
-        args.poslanci, conn, registry, tisky_registry, client, backend,
-        firecrawl_key, model_name, limit_clanky=args.limit_clanky,
-    )
+    leads = []
+    if args.poslanci:
+        leads += build_role_flip_leads(
+            args.poslanci, conn, registry, tisky_registry, client, backend,
+            firecrawl_key, model_name, limit_clanky=args.limit_clanky,
+        )
+    if args.videa:
+        leads += build_role_flip_leads_from_video(
+            args.videa, conn, registry, tisky_registry, client, backend, model_name,
+        )
     print(f"rolový obrat: {len(leads)} nových/aktualizovaných leadů. "
           f"Schválení: python pipeline/promote_media_lead.py --lead-id <id> (viz /interni/prehled)")
 

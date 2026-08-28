@@ -52,7 +52,7 @@ export interface RolovyObratLead {
   receno: {
     citace: string;
     rolePriCitatu: string;
-    zdroj: { url: string; medium: string; datumClanku: string };
+    zdroj: { url: string; medium: string; datumClanku: string; timestampSeconds?: number };
   };
   postoj: "PRO" | "PROTI";
   postojOduvodneni: string;

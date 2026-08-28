@@ -216,6 +216,52 @@ CREATE TABLE IF NOT EXISTS media_role_flip (
 );
 CREATE INDEX IF NOT EXISTS idx_media_role_flip_osoba ON media_role_flip(id_osoba);
 CREATE INDEX IF NOT EXISTS idx_media_role_flip_schvaleno ON media_role_flip(schvaleno);
+
+-- Diarizovaní mluvčí YouTube videí (Fáze 6c, pipeline/video_diarization.py).
+-- Diarizace sama vrátí jen anonymní `speaker_label` (SPEAKER_00…) podle
+-- hlasu — `id_osoba` je NULL, dokud ho ručně nenastaví
+-- `tag_video_speaker.py` pro jednoho mluvčího jednoho videa. Dokud je
+-- `id_osoba` NULL, `media_role_flip.py` z jeho úseků citace nestaví.
+CREATE TABLE IF NOT EXISTS video_speakers (
+    video_url     TEXT NOT NULL,
+    speaker_label TEXT NOT NULL,
+    id_osoba      TEXT,
+    sample_text   TEXT NOT NULL,
+    total_seconds REAL NOT NULL,
+    tagged_at     TEXT,
+    produced_at   TEXT NOT NULL,
+    PRIMARY KEY (video_url, speaker_label)
+);
+CREATE INDEX IF NOT EXISTS idx_video_speakers_osoba ON video_speakers(id_osoba);
+
+-- Cache sloučeného přepisu+diarizace pro jedno video (drahé na přepočet —
+-- stažení zvuku + diarizace), `segments_json` = výstup
+-- `video_diarization.merge_transcript_with_diarization`. `datum_videa` se
+-- dodává ručně při `prepare_video_speakers.py` (`/youtube/info` datum
+-- publikace nevrací, viz `psp/youtube_transcript.py`) — NULL, dokud ho
+-- operátor nezadá, nikdy se neodhaduje.
+CREATE TABLE IF NOT EXISTS video_transcript_cache (
+    video_url     TEXT PRIMARY KEY,
+    medium        TEXT NOT NULL,
+    datum_videa   TEXT,
+    segments_json TEXT NOT NULL,
+    produced_at   TEXT NOT NULL
+);
+
+-- Hlasové otisky známých politiků (Fáze 6d, pipeline/voice_embedding.py) —
+-- vstup pro `suggest_speakers`, jen NÁPOVĚDA operátorovi při tagování
+-- diarizovaných mluvčích (`tag_video_speaker.py`), nikdy zdroj pravdy —
+-- `video_speakers.id_osoba` z tohohle nikdy nečerpá přímo. Jeden vzorek na
+-- politika (`build_voice_goldset.py`, přepisovatelný), z okna zvuku, které
+-- si operátor sám ověřil poslechem/sledováním, ne z odhadu.
+CREATE TABLE IF NOT EXISTS voice_goldset (
+    id_osoba          TEXT PRIMARY KEY,
+    embedding_json    TEXT NOT NULL,
+    cast_id           TEXT NOT NULL,
+    source_moment     TEXT NOT NULL,
+    duration_seconds  REAL NOT NULL,
+    produced_at       TEXT NOT NULL
+);
 """
 
 _ENGINE_SCHEMA = _FACTS_SCHEMA + _VOTING_SCHEMA + """

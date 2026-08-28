@@ -432,6 +432,9 @@ def main() -> None:
     parser.add_argument("--output", default=DEFAULT_OUTPUT_PATH)
     parser.add_argument("--poslanec", action="append", default=[], dest="poslanci",
                         help="Rolový obrat v médiích (Fáze 6b) pro tohle jméno (opakovatelné).")
+    parser.add_argument("--video", action="append", default=[], dest="videa",
+                        help="Rolový obrat z videa (Fáze 6c), URL už zpracovaného přes "
+                             "prepare_video_speakers.py + tag_video_speaker.py (opakovatelné).")
     args = parser.parse_args()
 
     conn = open_engine_db()
@@ -444,8 +447,10 @@ def main() -> None:
 
     if args.poslanci and not firecrawl_key:
         print("  (FIRECRAWL_API_KEY chybí — --poslanec se přeskakuje)")
-    elif args.poslanci:
-        from media_role_flip import build_role_flip_leads
+        args.poslanci = []
+
+    if args.poslanci or args.videa:
+        from media_role_flip import build_role_flip_leads, build_role_flip_leads_from_video
         from psp.client import PspClient
         from psp.opendata import Registry
         from psp.tisky import TiskyRegistry
@@ -461,10 +466,15 @@ def main() -> None:
             else ApiBackend(conn)
         )
         mrf_model = getattr(mrf_backend, "default_model", CLAIM_EXTRACTION_MODEL)
-        build_role_flip_leads(
-            args.poslanci, conn, registry, tisky_registry, client, mrf_backend,
-            firecrawl_key, mrf_model,
-        )
+        if args.poslanci:
+            build_role_flip_leads(
+                args.poslanci, conn, registry, tisky_registry, client, mrf_backend,
+                firecrawl_key, mrf_model,
+            )
+        if args.videa:
+            build_role_flip_leads_from_video(
+                args.videa, conn, registry, tisky_registry, client, mrf_backend, mrf_model,
+            )
 
     rolovy_obrat = load_leads(conn)
 

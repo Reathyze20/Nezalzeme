@@ -1,0 +1,45 @@
+domain,tier,poznamka
+csu.gov.cz,1,Český statistický úřad - primární zdroj pro čísla
+czso.cz,1,Český statistický úřad (alternativní doména)
+psp.cz,1,Poslanecká sněmovna ČR - stenozáznamy a hlasování
+senat.cz,1,Senát ČR
+zakonyprolidi.cz,1,Databáze platné legislativy - citovat s konkrétním paragrafem
+mfcr.cz,1,Ministerstvo financí
+vlada.cz,1,Vláda ČR
+nku.cz,1,Nejvyšší kontrolní úřad
+volby.cz,1,Oficiální výsledky voleb - vždy použít pro volební tvrzení
+eurostat.ec.europa.eu,1,Eurostat - statistiky EU
+ec.europa.eu,1,Evropská komise
+justice.cz,1,Ministerstvo spravedlnosti / soudy
+usoud.cz,1,Ústavní soud
+mpsv.cz,1,Ministerstvo práce a sociálních věcí
+mvcr.cz,1,Ministerstvo vnitra
+uzis.cz,1,Ústav zdravotnických informací a statistiky
+chmi.cz,1,Český hydrometeorologický ústav
+irozhlas.cz,1,Český rozhlas (veřejnoprávní vysílání)
+ct24.ceskatelevize.cz,1,Česká televize (veřejnoprávní vysílání)
+ceskatelevize.cz,1,Česká televize (veřejnoprávní vysílání)
+ceskenoviny.cz,1,ČTK / Česká tisková kancelář - agenturní zpravodajství
+seznamzpravy.cz,2,Komerční zpravodajství s vyšší redakční kvalitou
+aktualne.cz,2,Komerční zpravodajství s vyšší redakční kvalitou
+respekt.cz,2,Týdeník s vyšším redakčním standardem
+hn.cz,2,Hospodářské noviny - byznysová redakce
+e15.cz,3,Byznysové zpravodajství
+faei.cz,3,Byznysové zpravodajství
+denik.cz,3,Regionální deník - širší síť, nižší jednotná redakční kontrola
+idnes.cz,3,Velký komerční portál - přijatelný, ne preferovaný
+novinky.cz,3,Velký komerční portál - přijatelný, ne preferovaný
+tn.cz,3,Velký komerční portál (TV Nova) - přijatelný, ne preferovaný
+mesec.cz,3,Osobní finance
+kurzy.cz,3,Finanční portál
+echo24.cz,4,Názorově zabarvené texty převažují nad zpravodajstvím
+press1.cz,4,Sekundární mediální zpravodajství (zprávy o zprávách)
+forum24.cz,5,Názorový server - nikdy nepoužívat jako zdroj citace
+blesk.cz,5,Bulvár - nikdy nepoužívat jako zdroj citace
+aha.cz,5,Bulvár - nikdy nepoužívat jako zdroj citace
+parlamentnilisty.cz,5,Nespolehlivý - nikdy nepoužívat jako zdroj citace
+wikipedia.org,5,Není primární zdroj - použít jen k dohledání primárního zdroje
+demagog.cz,5,Cizí parafráze/shrnutí výroku - riziko stejné jako Wikipedia
+fveinfo.cz,5,Nišový portál - nespolehlivý
+tiscali.cz,5,Nespolehlivý portál
+xstreet.cz,5,Nespolehlivý portál

@@ -16,6 +16,28 @@ torch>=2.0
 torchaudio>=2.1
 imageio-ffmpeg>=0.5
 
+# Fáze 6c: diarizace mluvčích v YouTube videích (pipeline/video_diarization.py,
+# rozšíření Rolového obratu o video zdroje). `pyannote.audio` vyžaduje
+# HUGGINGFACE_TOKEN s přijatými podmínkami modelu
+# pyannote/speaker-diarization-3.1. `yt-dlp` stahuje zvuk videa.
+pyannote.audio>=3.1
+yt-dlp>=2024.1
+
+# Fáze 6d: hlasové otisky jako nápověda při tagování diarizovaných mluvčích
+# (pipeline/voice_embedding.py, pipeline/build_voice_goldset.py) — předtrénovaný
+# ECAPA-TDNN (speechbrain/spkrec-ecapa-voxceleb z HuggingFace Hubu, žádný
+# vlastní trénink). `torch`/`torchaudio` už jsou výš. Nepovinné: bez
+# nainstalovaného balíčku se krok tiše přeskočí.
+speechbrain>=1.0
+
+# Fáze 6b (rozšíření): záložní extrakce data publikace článku, když ho
+# Firecrawl nevrátí ve strukturovaných meta tazích ani jako `<time datetime>`
+# (pipeline/media_role_flip.py's `_parse_date_with_htmldate`) — voláno v
+# konzervativním režimu `extensive_search=False` (jen strukturovaná pole:
+# JSON-LD, Open Graph, HTML5 datové vzory, URL — nikdy volný text stránky).
+# Nepovinné: bez nainstalovaného balíčku se krok tiše přeskočí.
+htmldate>=1.8,<2
+
 # Testování
 pytest>=8.0
 pytest-asyncio>=0.23
